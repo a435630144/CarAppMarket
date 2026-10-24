@@ -16,6 +16,20 @@ public class Formatters {
         return String.format(Locale.CHINA, "%.1f", n / 100000000.0) + "亿";
     }
 
+    /** ISO8601 → millis（解析失败返回 0），供排序比较 */
+    public static long parseIso(String iso) {
+        if (iso == null || iso.length() < 10) return 0;
+        try {
+            String s = iso.replace('T', ' ').replace("Z", "");
+            if (s.contains(".")) s = s.substring(0, s.indexOf('.'));
+            SimpleDateFormat in = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            Date d = in.parse(s.length() > 19 ? s.substring(0, 19) : s);
+            return d == null ? 0 : d.getTime();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     /** ISO8601 → "2026-10-25"；解析失败返回空串 */
     public static String date(String iso) {
         if (iso == null || iso.length() < 10) return "";

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 车机横屏布局：左侧栏（搜索/登录/热门）+ 右侧分类与列表 -->
+<!-- 车机横屏布局：左侧分类导航栏（热门/全部/各分类）+ 右侧排序栏与卡片网格 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,7 +8,7 @@
 
     <!-- 左侧栏 -->
     <LinearLayout
-        android:layout_width="248dp"
+        android:layout_width="236dp"
         android:layout_height="match_parent"
         android:background="@color/card"
         android:orientation="vertical"
@@ -46,69 +46,45 @@
             android:layout_marginBottom="4dp"
             android:background="@color/divider" />
 
-        <LinearLayout
-            android:id="@+id/hot_section"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:scrollbars="none">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/hot_title"
-                android:textColor="@color/text_main"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <ScrollView
+            <LinearLayout
+                android:id="@+id/cat_row"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="4dp"
-                android:layout_weight="1"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:id="@+id/hot_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </ScrollView>
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
     </LinearLayout>
 
-    <!-- 右侧：分类 + 列表 -->
+    <!-- 右侧：排序栏 + 网格 -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <HorizontalScrollView
-            android:id="@+id/hot_scroll"
+        <LinearLayout
+            android:id="@+id/sort_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="2dp"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/cat_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp" />
-        </HorizontalScrollView>
+            android:gravity="right|center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp" />
+        <!-- 排序按钮由代码动态添加（更新/下载量/评分） -->
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <!-- auto_fit 响应式网格：列数按剩余宽度自动计算
-                 （1024x600 车机约 2~3 列，1920 宽 4~5 列，21:9 更多），窄到 270dp 内自动回落单列 -->
+            <!-- auto_fit 响应式网格：列数按剩余宽度自动计算 -->
             <GridView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
@@ -119,7 +95,7 @@
                 android:numColumns="auto_fit"
                 android:paddingLeft="12dp"
                 android:paddingRight="12dp"
-                android:paddingTop="8dp"
+                android:paddingTop="2dp"
                 android:paddingBottom="12dp"
                 android:scrollbars="none"
                 android:stretchMode="columnWidth"

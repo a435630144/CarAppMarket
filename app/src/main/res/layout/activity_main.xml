@@ -43,46 +43,10 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- 热门推荐 -->
-    <LinearLayout
-        android:id="@+id/hot_section"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="12dp"
-            android:paddingTop="4dp"
-            android:text="@string/hot_title"
-            android:textColor="@color/text_main"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <HorizontalScrollView
-            android:id="@+id/hot_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="6dp"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/hot_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp" />
-        </HorizontalScrollView>
-    </LinearLayout>
-
-    <!-- 分类 -->
+    <!-- 分类（热门/全部/各分类） -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
         android:scrollbars="none">
 
         <LinearLayout
@@ -94,10 +58,22 @@
             android:paddingRight="12dp" />
     </HorizontalScrollView>
 
+    <!-- 排序栏 -->
+    <LinearLayout
+        android:id="@+id/sort_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right|center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="2dp"
         android:background="@color/divider" />
 
     <FrameLayout

@@ -150,6 +150,10 @@ public class SoftwareAdapter extends BaseAdapter {
         if (s.isOfficial) {
             badge.setText(R.string.badge_official);
             vis = View.VISIBLE;
+        } else if (s.collectionId != null) {
+            // 合集卡片：点进详情可切换版本
+            badge.setText(R.string.badge_collection);
+            vis = View.VISIBLE;
         } else if (s.isHot) {
             badge.setText(R.string.badge_hot);
             vis = View.VISIBLE;

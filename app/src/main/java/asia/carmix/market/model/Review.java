@@ -39,8 +39,8 @@ public class Review {
             String brand = u.optString("vehicleBrand", null);
             String model = u.optString("vehicleModel", null);
             StringBuilder sb = new StringBuilder();
-            if (brand != null && brand.length() > 0 && !"null".equals(brand)) sb.append(brand);
-            if (model != null && model.length() > 0 && !"null".equals(model)) {
+            if (brand != null && brand.length() > 0 && !"null".equalsIgnoreCase(brand)) sb.append(brand);
+            if (model != null && model.length() > 0 && !"null".equalsIgnoreCase(model)) {
                 if (sb.length() > 0) sb.append(" ");
                 sb.append(model);
             }

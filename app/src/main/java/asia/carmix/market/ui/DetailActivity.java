@@ -48,7 +48,8 @@ public class DetailActivity extends Activity {
     private TextView mDesc, mSysReq;
     private TextView mDownloadBtn;
     private LinearLayout mShotRow, mReviewRow;
-    private View mReviewsHeader, mReviewEmpty, mWriteReview;
+    private View mReviewsHeader, mReviewEmpty, mWriteReview, mVersionSection, mChangelogSection;
+    private LinearLayout mVersionRow, mChangelogRow;
     private TextView mReviewSummary;
 
     private ApkDownloader.Listener mDownloadListener = new ApkDownloader.Listener() {
@@ -97,6 +98,10 @@ public class DetailActivity extends Activity {
         mReviewEmpty = findViewById(R.id.d_review_empty);
         mWriteReview = findViewById(R.id.d_btn_review);
         mReviewSummary = (TextView) findViewById(R.id.d_review_summary);
+        mVersionSection = findViewById(R.id.d_version_section);
+        mVersionRow = (LinearLayout) findViewById(R.id.d_version_row);
+        mChangelogSection = findViewById(R.id.d_changelog_section);
+        mChangelogRow = (LinearLayout) findViewById(R.id.d_changelog_row);
 
         findViewById(R.id.d_progress).setVisibility(View.VISIBLE);
 
@@ -204,6 +209,71 @@ public class DetailActivity extends Activity {
             mDownloadBtn.setText(R.string.no_download_url);
         }
         buildScreenshots();
+        buildVersions();
+        buildChangelogs();
+    }
+
+    // ================================ 合集版本 ================================
+
+    /** 版本 chips：点击即切换到对应成员重新加载详情 */
+    private void buildVersions() {
+        mVersionRow.removeAllViews();
+        SoftwareItem.CollectionInfo col = mItem.collection;
+        if (col == null || col.versions.size() < 2) {
+            mVersionSection.setVisibility(View.GONE);
+            return;
+        }
+        mVersionSection.setVisibility(View.VISIBLE);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (final SoftwareItem.Version v : col.versions) {
+            TextView chip = (TextView) inflater.inflate(R.layout.item_chip, mVersionRow, false);
+            String label = TextUtils.isEmpty(v.version) ? "最新" : "v" + v.version;
+            if (!TextUtils.isEmpty(v.fileSize)) label += " · " + v.fileSize;
+            chip.setText(label);
+            chip.setSelected(v.id != null && v.id.equals(mItem.id));
+            chip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (v.id != null && !v.id.equals(mItem.id)) {
+                        mId = v.id;
+                        findViewById(R.id.d_progress).setVisibility(View.VISIBLE);
+                        loadDetail();
+                    }
+                }
+            });
+            mVersionRow.addView(chip);
+        }
+    }
+
+    /** 更新日志条目：版本号·日期 + 内容 */
+    private void buildChangelogs() {
+        mChangelogRow.removeAllViews();
+        SoftwareItem.CollectionInfo col = mItem.collection;
+        if (col == null || col.changelogs.isEmpty()) {
+            mChangelogSection.setVisibility(View.GONE);
+            return;
+        }
+        mChangelogSection.setVisibility(View.VISIBLE);
+        for (SoftwareItem.Changelog c : col.changelogs) {
+            TextView head = new TextView(this);
+            String h = TextUtils.isEmpty(c.versionLabel) ? "" : c.versionLabel + " · ";
+            head.setText(h + Formatters.date(c.createdAt));
+            head.setTextColor(0xFF2563EB);
+            head.setTextSize(13f);
+            head.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            mChangelogRow.addView(head);
+            if (!TextUtils.isEmpty(c.content)) {
+                TextView body = new TextView(this);
+                body.setText(c.content);
+                body.setTextColor(0xFF1F2937);
+                body.setTextSize(13f);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.topMargin = 2;
+                lp.bottomMargin = 8;
+                mChangelogRow.addView(body, lp);
+            }
+        }
     }
 
     private void buildScreenshots() {

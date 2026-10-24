@@ -18,7 +18,14 @@
     <string name="no_search_result">没有找到相关应用</string>
     <string name="search_hint">搜索应用名称</string>
     <string name="category_all">全部</string>
+    <string name="category_hot">热门</string>
     <string name="hot_title">热门推荐</string>
+    <string name="sort_updated">更新</string>
+    <string name="sort_downloads">下载量</string>
+    <string name="sort_rating">评分</string>
+    <string name="badge_collection">多版本</string>
+    <string name="versions_title">版本</string>
+    <string name="changelog_title">更新日志</string>
 
     <!-- 列表项 -->
     <string name="badge_official">官方</string>
