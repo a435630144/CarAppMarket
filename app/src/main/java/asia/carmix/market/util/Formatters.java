@@ -16,6 +16,17 @@ public class Formatters {
         return String.format(Locale.CHINA, "%.1f", n / 100000000.0) + "亿";
     }
 
+    /** 短日期：同年显示 "10-24"，跨年显示 "2025-12-30"；供窄卡片用 */
+    public static String shortDate(String iso) {
+        String full = date(iso);
+        if (full.length() != 10) return full;
+        String thisYear = String.valueOf(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR));
+        if (full.startsWith(thisYear + "-")) {
+            return full.substring(5);
+        }
+        return full;
+    }
+
     /** ISO8601 → millis（解析失败返回 0），供排序比较 */
     public static long parseIso(String iso) {
         if (iso == null || iso.length() < 10) return 0;

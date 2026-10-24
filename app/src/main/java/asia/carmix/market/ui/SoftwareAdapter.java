@@ -88,6 +88,8 @@ public class SoftwareAdapter extends BaseAdapter {
         h.meta.setText(s.metaLine());
         h.rating.setRating((float) s.averageRating);
         String stats = Formatters.count(s.downloadCount) + "次";
+        String d = Formatters.shortDate(s.createdAt);
+        if (d.length() > 0) stats += " · " + d;
         h.stats.setText(stats);
         bindBadge(h.badge, s);
         bindIcon(h.icon, s);
@@ -128,6 +130,8 @@ public class SoftwareAdapter extends BaseAdapter {
         if (s.ratingCount > 0) {
             stats += " · " + String.format(Locale.CHINA, "%.1f分", s.averageRating);
         }
+        String d = Formatters.shortDate(s.createdAt);
+        if (d.length() > 0) stats += " · " + d + "收录";
         h.stats.setText(stats);
         bindBadge(h.badge, s);
         bindIcon(h.icon, s);

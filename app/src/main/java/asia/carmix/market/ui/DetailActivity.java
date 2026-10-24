@@ -196,6 +196,10 @@ public class DetailActivity extends Activity {
         mRatingText.setText(String.format(java.util.Locale.CHINA, "%.1f分", mItem.averageRating));
         String stats = Formatters.count(mItem.downloadCount) + getString(R.string.downloads_suffix)
                 + " · " + Formatters.count(mItem.views) + getString(R.string.views_suffix);
+        String created = Formatters.date(mItem.createdAt);
+        if (created.length() > 0) {
+            stats += " · " + getString(R.string.created_at, created);
+        }
         mStats.setText(stats);
         mDesc.setText(TextUtils.isEmpty(mItem.description) ? "暂无介绍" : mItem.description);
         if (!TextUtils.isEmpty(mItem.systemRequirement)) {
