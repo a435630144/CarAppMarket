@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="bg">#F4F6FA</color>
+    <color name="card">#FFFFFF</color>
+    <color name="text_main">#1F2937</color>
+    <color name="text_sub">#6B7280</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="divider">#EEF1F5</color>
+    <color name="badge_official_bg">#2563EB</color>
+    <color name="badge_hot_bg">#F97316</color>
+    <color name="input_stroke">#D6DCE5</color>
+    <color name="disabled">#B0B7C3</color>
+</resources>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">车软星球市场</string>
+
+    <!-- 通用 -->
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="submit">提交</string>
+    <string name="cancel">取消</string>
+    <string name="refresh">刷新</string>
+    <string name="exit">退出</string>
+    <string name="logged_out">已退出登录</string>
+    <string name="hello_user">你好，%1$s</string>
+    <string name="login_required">请先登录</string>
+    <string name="form_incomplete">请填写完整</string>
+    <string name="load_failed">加载失败，请下拉重试或检查网络</string>
+    <string name="empty_list">暂无应用</string>
+    <string name="no_search_result">没有找到相关应用</string>
+    <string name="search_hint">搜索应用名称</string>
+    <string name="category_all">全部</string>
+    <string name="hot_title">热门推荐</string>
+
+    <!-- 列表项 -->
+    <string name="badge_official">官方</string>
+    <string name="badge_hot">热门</string>
+
+    <!-- 详情 -->
+    <string name="author_label">作者：%1$s</string>
+    <string name="downloads_suffix">次下载</string>
+    <string name="views_suffix">次浏览</string>
+    <string name="sysreq_label">系统要求：%1$s</string>
+    <string name="section_desc">应用介绍</string>
+    <string name="section_shots">应用截图</string>
+    <string name="reviews_title">车友评价</string>
+    <string name="download">下载</string>
+    <string name="install">安装</string>
+    <string name="downloading">下载中…</string>
+    <string name="downloading_percent">下载中 %1$d%%</string>
+    <string name="downloading_already">正在下载中，请稍候</string>
+    <string name="download_complete">下载完成，正在唤起安装</string>
+    <string name="no_download_url">暂无下载地址</string>
+    <string name="install_failed">无法启动安装：%1$s</string>
+
+    <!-- 评价 -->
+    <string name="review_summary_fmt">车友评分 %1$.1f · 共 %2$d 条评价</string>
+    <string name="write_review">写评价</string>
+    <string name="review_submitted">评价已提交</string>
+    <string name="review_empty">暂无评价，快来抢沙发吧</string>
+    <string name="original_review">修改前：%1$s</string>
+    <string name="like_count">有用 %1$d</string>
+    <string name="rating_only">仅评分</string>
+
+    <!-- 登录注册 -->
+    <string name="hint_email">邮箱</string>
+    <string name="hint_password">密码（至少6位）</string>
+    <string name="hint_username">用户名</string>
+    <string name="hint_code">验证码</string>
+    <string name="btn_login_text">登  录</string>
+    <string name="btn_register_text">注  册</string>
+    <string name="to_register">没有账号？去注册</string>
+    <string name="send_code">获取验证码</string>
+    <string name="resend_after">%1$d秒后重发</string>
+    <string name="code_sent">验证码已发送，请查收邮件</string>
+    <string name="email_required">请输入邮箱</string>
+    <string name="password_too_short">密码至少6位</string>
+    <string name="register_ok">注册成功，已自动登录</string>
+    <string name="review_content_hint">说说你的使用感受（可选，500字以内）</string>
+</resources>
