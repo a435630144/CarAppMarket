@@ -34,21 +34,22 @@ public class DownloadIconDrawable extends Drawable {
         mBg.setStyle(Paint.Style.FILL);
         canvas.drawCircle(cx, cy, r, mBg);
 
-        float u = r / 12f; // 归一化单位
+        // 图形收在圆内（约 0.62 半径），不顶到轮廓
+        float u = r / 16f;
         // 箭杆
-        canvas.drawRect(cx - 1.6f * u, cy - 7.5f * u, cx + 1.6f * u, cy + 0.5f * u, mFg);
+        canvas.drawRect(cx - 1.3f * u, cy - 6.2f * u, cx + 1.3f * u, cy + 0.4f * u, mFg);
         // 箭头三角
         Path tri = new Path();
-        tri.moveTo(cx - 5.5f * u, cy + 0.2f * u);
-        tri.lineTo(cx + 5.5f * u, cy + 0.2f * u);
-        tri.lineTo(cx, cy + 5.8f * u);
+        tri.moveTo(cx - 4.4f * u, cy + 0.1f * u);
+        tri.lineTo(cx + 4.4f * u, cy + 0.1f * u);
+        tri.lineTo(cx, cy + 4.6f * u);
         tri.close();
         canvas.drawPath(tri, mFg);
         // 托盘
         mFg.setStyle(Paint.Style.STROKE);
-        mFg.setStrokeWidth(2.4f * u);
+        mFg.setStrokeWidth(1.8f * u);
         mFg.setStrokeCap(Paint.Cap.ROUND);
-        canvas.drawLine(cx - 6.5f * u, cy + 9f * u, cx + 6.5f * u, cy + 9f * u, mFg);
+        canvas.drawLine(cx - 5.2f * u, cy + 7f * u, cx + 5.2f * u, cy + 7f * u, mFg);
         mFg.setStyle(Paint.Style.FILL);
     }
 

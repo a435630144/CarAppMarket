@@ -204,24 +204,27 @@ public class ApkDownloader {
             }
         }
         final Context app = ctx.getApplicationContext();
+        // 同名安装包已存在（重复下载同一软件）→ 加 (1)(2) 后缀，绝不覆盖旧文件，
+        // 保证每次下载的产物都可被管理页追踪，不产生脱离管理的遗留文件
+        final String uniqueName = uniqueFileName(app, fileName);
         final Task task = new Task();
         task.tag = tag;
         task.displayName = displayName;
-        task.fileName = fileName;
+        task.fileName = uniqueName;
         synchronized (sTasks) {
             sTasks.put(tag, task);
         }
         fireCenter();
 
-        final int notifId = fileName.hashCode();
+        final int notifId = uniqueName.hashCode();
         final NotificationManager nm = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 final File dir = downloadsDir(app);
-                final File target = new File(dir, fileName);
-                final File tmp = new File(dir, fileName + ".tmp");
+                final File target = new File(dir, uniqueName);
+                final File tmp = new File(dir, uniqueName + ".tmp");
                 Exception error = null;
                 for (int attempt = 0; attempt < 2; attempt++) {
                     if (task.cancelled) break;
@@ -265,6 +268,24 @@ public class ApkDownloader {
                 }
             }
         }, "apk-download").start();
+    }
+
+    /** 目标名冲突时生成 base(1).apk / base(2).apk … */
+    static String uniqueFileName(Context ctx, String desired) {
+        File dir = downloadsDir(ctx);
+        if (!new File(dir, desired).exists()) return desired;
+        String base = desired;
+        String ext = "";
+        int dot = desired.lastIndexOf('.');
+        if (dot > 0) {
+            base = desired.substring(0, dot);
+            ext = desired.substring(dot);
+        }
+        for (int i = 1; i < 1000; i++) {
+            String c = base + "(" + i + ")" + ext;
+            if (!new File(dir, c).exists()) return c;
+        }
+        return "dl-" + System.currentTimeMillis() + ext;
     }
 
     /** 单次下载执行（含续传），完成后 tmp 即完整文件。异常时关闭并抛出。 */

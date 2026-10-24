@@ -89,7 +89,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
-            h.dlBtn = (ImageView) convertView.findViewById(R.id.btn_download);
+            h.dlBtn = (TextView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
             h = (CardHolder) convertView.getTag();
@@ -115,7 +115,7 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
-        ImageView dlBtn;
+        TextView dlBtn;
     }
 
     // ================================ 单列横条（竖屏手机） ================================
@@ -131,7 +131,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
-            h.dlBtn = (ImageView) convertView.findViewById(R.id.btn_download);
+            h.dlBtn = (TextView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
             h = (RowHolder) convertView.getTag();
@@ -160,22 +160,28 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
-        ImageView dlBtn;
+        TextView dlBtn;
     }
 
     // ================================ 公共绑定 ================================
 
-    private void bindDownload(ImageView btn, final SoftwareItem s) {
-        btn.setImageDrawable(new asia.carmix.market.util.DownloadIconDrawable(
-                0xFF2563EB, 0xFFFFFFFF));
-        if (mDownloadClick != null) {
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDownloadClick.onDownloadClick(s, v);
-                }
-            });
+    private void bindDownload(TextView btn, final SoftwareItem s) {
+        if (s.downloadable()) {
+            btn.setEnabled(true);
+            btn.setAlpha(1f);
+            if (mDownloadClick != null) {
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mDownloadClick.onDownloadClick(s, v);
+                    }
+                });
+            } else {
+                btn.setOnClickListener(null);
+            }
         } else {
+            btn.setEnabled(false);
+            btn.setAlpha(0.4f);
             btn.setOnClickListener(null);
         }
     }
