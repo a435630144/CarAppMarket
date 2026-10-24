@@ -16,6 +16,33 @@ public class Formatters {
         return String.format(Locale.CHINA, "%.1f", n / 100000000.0) + "亿";
     }
 
+    /** 字节 → "830 KB" / "44.4 MB" / "1.2 GB" */
+    public static String bytes(long b) {
+        if (b < 1024) return b + " B";
+        double kb = b / 1024.0;
+        if (kb < 1024) return oneDecimal(kb) + " KB";
+        double mb = kb / 1024.0;
+        if (mb < 1024) return oneDecimal(mb) + " MB";
+        return oneDecimal(mb / 1024.0) + " GB";
+    }
+
+    /** 下载速度：bytes(bps) + "/s" */
+    public static String speed(long bytesPerSec) {
+        return bytes(bytesPerSec) + "/s";
+    }
+
+    private static String oneDecimal(double v) {
+        return v >= 100 ? String.valueOf(Math.round(v))
+                : String.format(Locale.CHINA, "%.1f", v);
+    }
+
+    /** 毫秒 → "2026-10-25" */
+    public static String dateMillis(long ms) {
+        if (ms <= 0) return "";
+        SimpleDateFormat out = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        return out.format(new Date(ms));
+    }
+
     /** 短日期：同年显示 "10-24"，跨年显示 "2025-12-30"；供窄卡片用 */
     public static String shortDate(String iso) {
         String full = date(iso);

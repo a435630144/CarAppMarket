@@ -24,6 +24,19 @@
     <string name="sort_downloads">下载量</string>
     <string name="sort_rating">评分</string>
     <string name="badge_collection">多版本</string>
+    <string name="desc_download">下载</string>
+    <string name="desc_dl_center">下载管理</string>
+    <string name="dl_center_title">下载管理</string>
+    <string name="dl_section_downloading">下载任务</string>
+    <string name="dl_section_files">已下载的安装包</string>
+    <string name="dl_cancel">取消</string>
+    <string name="dl_install">安装</string>
+    <string name="dl_delete">删除</string>
+    <string name="dl_delete_confirm">确认删除该安装包？</string>
+    <string name="dl_empty">暂无下载任务和安装包</string>
+    <string name="dl_state_failed">下载失败</string>
+    <string name="dl_cancelled">已取消</string>
+    <string name="dl_deleted">已删除</string>
     <string name="versions_title">版本</string>
     <string name="changelog_title">更新日志</string>
 

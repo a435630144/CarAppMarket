@@ -485,38 +485,11 @@ public class DetailActivity extends Activity {
 
     private void startDownload() {
         mDownloadBtn.setText(R.string.downloading);
-        Task.run(new Task.Background<String[]>() {
-            @Override
-            public String[] run() throws Exception {
-                String url = null;
-                String name = null;
-                try {
-                    Api.DownloadInfo info = Api.requestDownload(DetailActivity.this, mItem.id);
-                    if (info != null) {
-                        url = info.url;
-                        name = info.fileName;
-                    }
-                } catch (Exception ignored) {
-                    // 计数失败不阻断下载，退回详情数据
-                }
-                if (TextUtils.isEmpty(url)) {
-                    url = !TextUtils.isEmpty(mItem.downloadUrl) ? mItem.downloadUrl : mItem.downloadLink;
-                }
-                if (TextUtils.isEmpty(name)) name = mItem.downloadFileName;
-                if (TextUtils.isEmpty(name)) name = "carmix-" + mItem.id + ".apk";
-                return new String[]{url, sanitizeFileName(name)};
-            }
-        }, new Task.Ui<String[]>() {
-            @Override
-            public void onDone(String[] result, Exception error) {
-                if (result == null || result[0] == null || result[0].length() == 0) {
-                    mDownloadBtn.setText(R.string.download);
-                    toast(getString(R.string.no_download_url));
-                    return;
-                }
-                ApkDownloader.start(DetailActivity.this, mItem.id, result[0], result[1], mDownloadListener);
-            }
-        });
+        boolean started = asia.carmix.market.util.DownloadStarter.start(
+                this, mItem, mDownloadListener);
+        if (!started) {
+            mDownloadBtn.setText(R.string.download);
+        }
     }
 
     private void promptInstall() {
@@ -529,7 +502,7 @@ public class DetailActivity extends Activity {
     }
 
     /** 文件名清洗：去掉路径分隔符，保证 .apk 结尾 */
-    static String sanitizeFileName(String name) {
+    public static String sanitizeFileName(String name) {
         String n = name.replaceAll("[\\\\/:*?\"<>|\\s]+", "_");
         if (!n.toLowerCase(java.util.Locale.US).endsWith(".apk")) {
             n = n + ".apk";

@@ -25,13 +25,23 @@ import asia.carmix.market.util.LetterDrawable;
  */
 public class SoftwareAdapter extends BaseAdapter {
 
+    /** 卡片下载按钮回调（origin 供飞行动画取起点坐标） */
+    public interface OnDownloadClick {
+        void onDownloadClick(SoftwareItem item, View origin);
+    }
+
     private final LayoutInflater mInflater;
     private final boolean mGridMode;
     private final List<SoftwareItem> mItems = new ArrayList<SoftwareItem>();
+    private OnDownloadClick mDownloadClick;
 
     public SoftwareAdapter(LayoutInflater inflater, boolean gridMode) {
         this.mInflater = inflater;
         this.mGridMode = gridMode;
+    }
+
+    public void setDownloadClickListener(OnDownloadClick l) {
+        mDownloadClick = l;
     }
 
     public void setItems(List<SoftwareItem> items) {
@@ -79,6 +89,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
+            h.dlBtn = (ImageView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
             h = (CardHolder) convertView.getTag();
@@ -93,6 +104,7 @@ public class SoftwareAdapter extends BaseAdapter {
         h.stats.setText(stats);
         bindBadge(h.badge, s);
         bindIcon(h.icon, s);
+        bindDownload(h.dlBtn, s);
         return convertView;
     }
 
@@ -103,6 +115,7 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
+        ImageView dlBtn;
     }
 
     // ================================ 单列横条（竖屏手机） ================================
@@ -118,6 +131,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
+            h.dlBtn = (ImageView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
             h = (RowHolder) convertView.getTag();
@@ -135,6 +149,7 @@ public class SoftwareAdapter extends BaseAdapter {
         h.stats.setText(stats);
         bindBadge(h.badge, s);
         bindIcon(h.icon, s);
+        bindDownload(h.dlBtn, s);
         return convertView;
     }
 
@@ -145,9 +160,25 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
+        ImageView dlBtn;
     }
 
     // ================================ 公共绑定 ================================
+
+    private void bindDownload(ImageView btn, final SoftwareItem s) {
+        btn.setImageDrawable(new asia.carmix.market.util.DownloadIconDrawable(
+                0xFF2563EB, 0xFFFFFFFF));
+        if (mDownloadClick != null) {
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDownloadClick.onDownloadClick(s, v);
+                }
+            });
+        } else {
+            btn.setOnClickListener(null);
+        }
+    }
 
     private void bindBadge(TextView badge, SoftwareItem s) {
         int vis = View.GONE;

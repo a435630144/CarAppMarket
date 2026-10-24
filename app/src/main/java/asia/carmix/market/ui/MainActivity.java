@@ -31,6 +31,7 @@ import asia.carmix.market.R;
 import asia.carmix.market.Session;
 import asia.carmix.market.api.Api;
 import asia.carmix.market.model.SoftwareItem;
+import asia.carmix.market.util.ApkDownloader;
 import asia.carmix.market.util.Formatters;
 import asia.carmix.market.util.Task;
 
@@ -57,6 +58,8 @@ public class MainActivity extends Activity {
     private TextView mFooter;
     private LinearLayout mCatRow;
     private LinearLayout mSortRow;
+    private View mDlCenter;      // 下载管理入口（含角标）
+    private TextView mDlBadge;   // 任务数角标
 
     private final List<SoftwareItem> mAll = new ArrayList<SoftwareItem>();
     private final List<String> mCategories = new ArrayList<String>();
@@ -154,8 +157,162 @@ public class MainActivity extends Activity {
         });
 
         buildSortButtons();
+        buildDownloadCenter();
+        mAdapter.setDownloadClickListener(new SoftwareAdapter.OnDownloadClick() {
+            @Override
+            public void onDownloadClick(SoftwareItem item, View origin) {
+                boolean started = asia.carmix.market.util.DownloadStarter.start(
+                        MainActivity.this, item, sToastListener);
+                if (started) flyToDownloadCenter(origin);
+            }
+        });
         loadPage(1, true);
         loadCategories();
+    }
+
+    /** 网格发起的下载：完成/失败用轻提示，进度走通知与下载管理页 */
+    private static final ApkDownloader.Listener sToastListener =
+            new ApkDownloader.Listener() {
+                @Override
+                public void onProgress(String tag, int percent) {
+                }
+
+                @Override
+                public void onComplete(String tag, java.io.File file) {
+                }
+
+                @Override
+                public void onError(String tag, String message) {
+                }
+            };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ApkDownloader.removeCenterListener(mCenterListener);
+    }
+
+    private final ApkDownloader.CenterListener mCenterListener =
+            new ApkDownloader.CenterListener() {
+                @Override
+                public void onTasksChanged() {
+                    updateDlBadge();
+                }
+            };
+
+    private void updateDlBadge() {
+        if (mDlBadge == null) return;
+        int n = ApkDownloader.activeCount();
+        if (n > 0) {
+            mDlBadge.setText(String.valueOf(n));
+            mDlBadge.setVisibility(View.VISIBLE);
+        } else {
+            mDlBadge.setVisibility(View.GONE);
+        }
+    }
+
+    /** 下载管理入口：蓝色圆底箭头图标 + 任务数角标，点击进入下载管理页 */
+    private void buildDownloadCenter() {
+        LinearLayout sortRow = mSortRow;
+        android.widget.FrameLayout box = new android.widget.FrameLayout(this);
+        box.setContentDescription(getString(R.string.desc_dl_center));
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        blp.leftMargin = 12;
+        sortRow.addView(box, blp);
+
+        android.widget.ImageView icon = new android.widget.ImageView(this);
+        icon.setImageDrawable(new asia.carmix.market.util.DownloadIconDrawable(0xFF2563EB, 0xFFFFFFFF));
+        android.widget.FrameLayout.LayoutParams ilp = new android.widget.FrameLayout.LayoutParams(
+                (int) (30 * getResources().getDisplayMetrics().density),
+                (int) (30 * getResources().getDisplayMetrics().density));
+        ilp.gravity = android.view.Gravity.CENTER;
+        icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, DownloadManagerActivity.class));
+            }
+        });
+        box.addView(icon, ilp);
+        box.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, DownloadManagerActivity.class));
+            }
+        });
+
+        mDlBadge = new TextView(this);
+        mDlBadge.setTextColor(0xFFFFFFFF);
+        mDlBadge.setTextSize(10f);
+        mDlBadge.setGravity(android.view.Gravity.CENTER);
+        mDlBadge.setVisibility(View.GONE);
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        bg.setColor(0xFFE53935);
+        mDlBadge.setBackgroundDrawable(bg);
+        int badge = (int) (17 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout.LayoutParams tlp = new android.widget.FrameLayout.LayoutParams(
+                badge, badge, android.view.Gravity.TOP | android.view.Gravity.RIGHT);
+        box.addView(mDlBadge, tlp);
+        mDlCenter = box;
+        updateDlBadge();
+    }
+
+    /** 卡片按钮 → 下载管理入口的飞行动画（抛物线 + 缩小） */
+    private void flyToDownloadCenter(View origin) {
+        if (mDlCenter == null) return;
+        try {
+            android.view.ViewGroup content = (android.view.ViewGroup)
+                    findViewById(android.R.id.content);
+            int[] from = new int[2];
+            origin.getLocationOnScreen(from);
+            int[] to = new int[2];
+            mDlCenter.getLocationOnScreen(to);
+            int[] root = new int[2];
+            content.getLocationOnScreen(root);
+            float fx = from[0] - root[0];
+            float fy = from[1] - root[1];
+            float tx = to[0] - root[0];
+            float ty = to[1] - root[1];
+
+            final android.widget.ImageView dot = new android.widget.ImageView(this);
+            dot.setImageDrawable(new asia.carmix.market.util.DownloadIconDrawable(
+                    0xFF2563EB, 0xFFFFFFFF));
+            int d = (int) (34 * getResources().getDisplayMetrics().density);
+            android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(d, d);
+            lp.leftMargin = (int) fx;
+            lp.topMargin = (int) fy;
+            content.addView(dot, lp);
+
+            android.animation.ValueAnimator anim =
+                    android.animation.ValueAnimator.ofFloat(0f, 1f);
+            anim.setDuration(520);
+            anim.setInterpolator(new android.view.animation.DecelerateInterpolator());
+            final float arc = 90 * getResources().getDisplayMetrics().density;
+            anim.addUpdateListener(new android.animation.ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(android.animation.ValueAnimator a) {
+                    float t = (Float) a.getAnimatedValue();
+                    float x = fx + (tx - fx) * t;
+                    float y = fy + (ty - fy) * t - arc * (float) Math.sin(Math.PI * t);
+                    dot.setTranslationX(x - fx);
+                    dot.setTranslationY(y - fy);
+                    float s = 1f - 0.35f * t;
+                    dot.setScaleX(s);
+                    dot.setScaleY(s);
+                    dot.setAlpha(1f - 0.4f * t);
+                }
+            });
+            anim.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    content.removeView(dot);
+                }
+            });
+            anim.start();
+        } catch (Throwable ignored) {
+            // 动画失败不影响下载流程
+        }
     }
 
     @Override
