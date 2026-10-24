@@ -107,14 +107,23 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <ListView
+            <!-- auto_fit 响应式网格：列数按剩余宽度自动计算
+                 （1024x600 车机约 2~3 列，1920 宽 4~5 列，21:9 更多），窄到 270dp 内自动回落单列 -->
+            <GridView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:divider="@null"
-                android:paddingTop="4dp"
-                android:paddingBottom="8dp"
-                android:scrollbars="none" />
+                android:clipToPadding="false"
+                android:columnWidth="272dp"
+                android:horizontalSpacing="10dp"
+                android:numColumns="auto_fit"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="12dp"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp" />
 
             <ProgressBar
                 android:id="@+id/loading"

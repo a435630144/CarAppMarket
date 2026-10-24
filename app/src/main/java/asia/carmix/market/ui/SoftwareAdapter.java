@@ -10,19 +10,28 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import asia.carmix.market.R;
 import asia.carmix.market.model.SoftwareItem;
 import asia.carmix.market.util.Formatters;
 import asia.carmix.market.util.ImageLoader;
+import asia.carmix.market.util.LetterDrawable;
 
+/**
+ * 双模式条目适配器：
+ * - gridMode=true  → 横屏车机网格小卡片（item_software_card）
+ * - gridMode=false → 竖屏手机单列横条（item_software）
+ */
 public class SoftwareAdapter extends BaseAdapter {
 
     private final LayoutInflater mInflater;
+    private final boolean mGridMode;
     private final List<SoftwareItem> mItems = new ArrayList<SoftwareItem>();
 
-    public SoftwareAdapter(LayoutInflater inflater) {
+    public SoftwareAdapter(LayoutInflater inflater, boolean gridMode) {
         this.mInflater = inflater;
+        this.mGridMode = gridMode;
     }
 
     public void setItems(List<SoftwareItem> items) {
@@ -53,10 +62,17 @@ public class SoftwareAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder h;
+        return mGridMode ? getCardView(position, convertView, parent)
+                : getRowView(position, convertView, parent);
+    }
+
+    // ================================ 网格卡片（横屏车机） ================================
+
+    private View getCardView(int position, View convertView, ViewGroup parent) {
+        CardHolder h;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.item_software, parent, false);
-            h = new ViewHolder();
+            convertView = mInflater.inflate(R.layout.item_software_card, parent, false);
+            h = new CardHolder();
             h.icon = (ImageView) convertView.findViewById(R.id.icon);
             h.name = (TextView) convertView.findViewById(R.id.name);
             h.meta = (TextView) convertView.findViewById(R.id.meta);
@@ -65,7 +81,44 @@ public class SoftwareAdapter extends BaseAdapter {
             h.badge = (TextView) convertView.findViewById(R.id.badge);
             convertView.setTag(h);
         } else {
-            h = (ViewHolder) convertView.getTag();
+            h = (CardHolder) convertView.getTag();
+        }
+        SoftwareItem s = getItem(position);
+        h.name.setText(s.name);
+        h.meta.setText(s.metaLine());
+        h.rating.setRating((float) s.averageRating);
+        String stats = Formatters.count(s.downloadCount) + "次";
+        h.stats.setText(stats);
+        bindBadge(h.badge, s);
+        bindIcon(h.icon, s);
+        return convertView;
+    }
+
+    private static class CardHolder {
+        ImageView icon;
+        TextView name;
+        TextView meta;
+        RatingBar rating;
+        TextView stats;
+        TextView badge;
+    }
+
+    // ================================ 单列横条（竖屏手机） ================================
+
+    private View getRowView(int position, View convertView, ViewGroup parent) {
+        RowHolder h;
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.item_software, parent, false);
+            h = new RowHolder();
+            h.icon = (ImageView) convertView.findViewById(R.id.icon);
+            h.name = (TextView) convertView.findViewById(R.id.name);
+            h.meta = (TextView) convertView.findViewById(R.id.meta);
+            h.rating = (RatingBar) convertView.findViewById(R.id.rating);
+            h.stats = (TextView) convertView.findViewById(R.id.stats);
+            h.badge = (TextView) convertView.findViewById(R.id.badge);
+            convertView.setTag(h);
+        } else {
+            h = (RowHolder) convertView.getTag();
         }
         SoftwareItem s = getItem(position);
         h.name.setText(s.name);
@@ -73,33 +126,42 @@ public class SoftwareAdapter extends BaseAdapter {
         h.rating.setRating((float) s.averageRating);
         String stats = Formatters.count(s.downloadCount) + "次下载";
         if (s.ratingCount > 0) {
-            stats += " · " + String.format(java.util.Locale.CHINA, "%.1f分", s.averageRating);
+            stats += " · " + String.format(Locale.CHINA, "%.1f分", s.averageRating);
         }
         h.stats.setText(stats);
-        int badgeVis = View.GONE;
-        if (s.isOfficial) {
-            h.badge.setText(R.string.badge_official);
-            badgeVis = View.VISIBLE;
-        } else if (s.isHot) {
-            h.badge.setText(R.string.badge_hot);
-            badgeVis = View.VISIBLE;
-        }
-        h.badge.setVisibility(badgeVis);
-        if (s.thumbnailUrl == null || s.thumbnailUrl.length() == 0 || "null".equals(s.thumbnailUrl)) {
-            h.icon.setImageDrawable(new asia.carmix.market.util.LetterDrawable(s.name));
-        } else {
-            ImageLoader.get(convertView.getContext())
-                    .display(h.icon, s.thumbnailUrl, R.drawable.placeholder_app);
-        }
+        bindBadge(h.badge, s);
+        bindIcon(h.icon, s);
         return convertView;
     }
 
-    private static class ViewHolder {
+    private static class RowHolder {
         ImageView icon;
         TextView name;
         TextView meta;
         RatingBar rating;
         TextView stats;
         TextView badge;
+    }
+
+    // ================================ 公共绑定 ================================
+
+    private void bindBadge(TextView badge, SoftwareItem s) {
+        int vis = View.GONE;
+        if (s.isOfficial) {
+            badge.setText(R.string.badge_official);
+            vis = View.VISIBLE;
+        } else if (s.isHot) {
+            badge.setText(R.string.badge_hot);
+            vis = View.VISIBLE;
+        }
+        badge.setVisibility(vis);
+    }
+
+    private void bindIcon(ImageView icon, SoftwareItem s) {
+        if (s.thumbnailUrl == null || s.thumbnailUrl.length() == 0 || "null".equals(s.thumbnailUrl)) {
+            icon.setImageDrawable(new LetterDrawable(s.name));
+        } else {
+            ImageLoader.get(icon.getContext()).display(icon, s.thumbnailUrl, R.drawable.placeholder_app);
+        }
     }
 }

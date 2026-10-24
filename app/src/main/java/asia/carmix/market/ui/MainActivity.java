@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
     private static final int REQ_LOGIN = 1;
 
     private SoftwareAdapter mAdapter;
-    private ListView mList;
+    private AbsListView mList;
     private ProgressBar mLoading;
     private TextView mEmpty;
     private TextView mFooter;
@@ -65,8 +65,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAdapter = new SoftwareAdapter(LayoutInflater.from(this));
-        mList = (ListView) findViewById(R.id.list);
+        if (savedInstanceState != null) {
+            String cat = savedInstanceState.getString("category");
+            if (cat != null) mCurrentCategory = cat;
+            mQuery = savedInstanceState.getString("query", "");
+        }
+
+        mAdapter = new SoftwareAdapter(LayoutInflater.from(this),
+                getResources().getConfiguration().orientation
+                        == android.content.res.Configuration.ORIENTATION_LANDSCAPE);
+        mList = (AbsListView) findViewById(R.id.list);
         mLoading = (ProgressBar) findViewById(R.id.loading);
         mEmpty = (TextView) findViewById(R.id.empty);
         mCatRow = (LinearLayout) findViewById(R.id.cat_row);
@@ -74,8 +82,11 @@ public class MainActivity extends Activity {
         mHotSection = findViewById(R.id.hot_section);
         mHotScroll = (HorizontalScrollView) findViewById(R.id.hot_scroll);
 
+        // 「加载更多」footer 仅 ListView 支持；横屏 GridView 靠滚动预加载，无需 footer
         mFooter = (TextView) LayoutInflater.from(this).inflate(R.layout.footer_loading, mList, false);
-        mList.addFooterView(mFooter, null, false);
+        if (mList instanceof ListView) {
+            ((ListView) mList).addFooterView(mFooter, null, false);
+        }
         mFooter.setVisibility(View.GONE);
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -153,6 +164,13 @@ public class MainActivity extends Activity {
         } else {
             btn.setText(R.string.login);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("category", mCurrentCategory);
+        outState.putString("query", mQuery);
     }
 
     @Override
