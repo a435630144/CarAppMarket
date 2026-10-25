@@ -63,6 +63,10 @@ public class MainActivity extends BaseActivity {
     private LinearLayout mSortRow;
     private View mDlCenter;      // 下载管理入口（含角标）
     private TextView mDlBadge;   // 任务数角标
+    private View mErrorView;     // 加载失败错误态
+    private boolean mLoadFailed = false;
+    private final android.os.Handler mUiHandler = new android.os.Handler();
+    private static final long AUTO_RETRY_MS = 15000;
 
     private final List<SoftwareItem> mAll = new ArrayList<SoftwareItem>();
     private final List<String> mCategories = new ArrayList<String>();
@@ -95,6 +99,16 @@ public class MainActivity extends BaseActivity {
         mEmpty = (TextView) findViewById(R.id.empty);
         mCatRow = (LinearLayout) findViewById(R.id.cat_row);
         mSortRow = (LinearLayout) findViewById(R.id.sort_row);
+        mErrorView = findViewById(R.id.error_view);
+        findViewById(R.id.btn_retry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                manualReload();
+            }
+        });
+
+        // 固定导航（热门/全部）不依赖网络；分类接口成功后追加真实分类
+        buildNav();
 
         // 「加载更多」footer 仅 ListView 支持；横屏 GridView 靠滚动预加载
         mFooter = (TextView) LayoutInflater.from(this).inflate(R.layout.footer_loading, mList, false);
@@ -188,12 +202,6 @@ public class MainActivity extends BaseActivity {
                 public void onError(String tag, String message) {
                 }
             };
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ApkDownloader.removeCenterListener(mCenterListener);
-    }
 
     private final ApkDownloader.CenterListener mCenterListener =
             new ApkDownloader.CenterListener() {
@@ -335,12 +343,6 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        refreshLoginButton();
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("category", mCurrentCategory);
@@ -380,13 +382,15 @@ public class MainActivity extends BaseActivity {
                 mLoading.setVisibility(View.GONE);
                 mFooter.setVisibility(View.GONE);
                 if (error != null) {
-                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                    if (mAll.isEmpty() || reset) {
-                        mEmpty.setText(R.string.load_failed);
-                        mEmpty.setVisibility(View.VISIBLE);
-                    }
+                    // 失败即清空：离线/异常时页面为干净错误态，无任何详情入口
+                    mLoadFailed = true;
+                    mAll.clear();
+                    applyFilter();
+                    startAutoRetry();
                     return;
                 }
+                mLoadFailed = false;
+                stopAutoRetry();
                 if (reset) mAll.clear();
                 mAll.addAll(result.items);
                 mPage = result.page;
@@ -525,12 +529,65 @@ public class MainActivity extends BaseActivity {
         }
         sortShown(shown);
         mAdapter.setItems(shown);
-        if (shown.isEmpty()) {
-            mEmpty.setText(mQuery.length() > 0 ? R.string.no_search_result : R.string.empty_list);
-            mEmpty.setVisibility(View.VISIBLE);
-        } else {
+        // 错误态优先：失败时页面只渲染错误 UI（无列表=无详情入口，无搜索通道）
+        if (mLoadFailed) {
             mEmpty.setVisibility(View.GONE);
+            mErrorView.setVisibility(View.VISIBLE);
+        } else {
+            mErrorView.setVisibility(View.GONE);
+            if (shown.isEmpty()) {
+                mEmpty.setText(mQuery.length() > 0 ? R.string.no_search_result : R.string.empty_list);
+                mEmpty.setVisibility(View.VISIBLE);
+            } else {
+                mEmpty.setVisibility(View.GONE);
+            }
         }
+    }
+
+    // ================================ 失败自动重试 ================================
+
+    private final Runnable mAutoRetry = new Runnable() {
+        @Override
+        public void run() {
+            if (!mLoadFailed) return;
+            manualReload();
+        }
+    };
+
+    private void startAutoRetry() {
+        mUiHandler.removeCallbacks(mAutoRetry);
+        mUiHandler.postDelayed(mAutoRetry, AUTO_RETRY_MS);
+    }
+
+    private void stopAutoRetry() {
+        mUiHandler.removeCallbacks(mAutoRetry);
+    }
+
+    /** 手动/自动重试：重抓列表与分类 */
+    private void manualReload() {
+        stopAutoRetry();
+        loadPage(1, true);
+        loadCategories();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshLoginButton();
+        if (mLoadFailed) startAutoRetry();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopAutoRetry();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopAutoRetry();
+        ApkDownloader.removeCenterListener(mCenterListener);
     }
 
     private void sortShown(List<SoftwareItem> list) {

@@ -117,6 +117,8 @@
                 android:text="@string/empty_list"
                 android:textColor="@color/text_sub"
                 android:visibility="gone" />
+
+            <include layout="@layout/view_load_error" />
         </FrameLayout>
     </LinearLayout>
 </LinearLayout>
