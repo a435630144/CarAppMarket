@@ -1,6 +1,7 @@
 # CarAppMarket · 车软星球市场
 
 > GitHub：<https://github.com/a435630144/CarAppMarket>
+> 文档：[HANDOVER.md](HANDOVER.md) 交接文档（接手必读） · [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md) 开发日志 · 本 README（功能/兼容/构建）
 
 车软星球市场（CarAppMarket）——车机软件站 **<后端域名>** 的安卓客户端，**主要面向汽车车机横屏大屏**，同时兼容手机。
 最低支持 **Android 4.0（API 14）**，可在最新版 Android 上正常安装运行（targetSdk 28，Android 14+ 允许侧载）。
