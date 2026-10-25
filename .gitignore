@@ -8,3 +8,6 @@ captures/
 .classpath
 .project
 app/build/
+keystore.properties
+*.jks
+*.keystore

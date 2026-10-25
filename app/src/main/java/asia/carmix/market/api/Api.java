@@ -359,6 +359,44 @@ public class Api {
         return authResult(postJson(ctx, "/auth/user/register", body));
     }
 
+    // ============================ 商店自更新 ============================
+
+    public static class AppVersion {
+        public int versionCode;
+        public String versionName;
+        public String downloadUrl;
+        public String fileSize;
+        public String sha256;
+        public String changelog;
+        public boolean forceUpdate;
+        public int minSupportedCode;
+    }
+
+    /** 最新版本元数据；未配置/空响应返回 null（视为无更新） */
+    public static AppVersion latestApp(Context ctx) throws ApiException {
+        String text = request(ctx, "GET", "/app/latest", null);
+        if (text == null) return null;
+        String t = text.trim();
+        if (t.isEmpty() || "null".equals(t) || !t.startsWith("{")) return null;
+        try {
+            JSONObject o = new JSONObject(t);
+            if (!o.has("versionCode")) return null;
+            AppVersion v = new AppVersion();
+            v.versionCode = o.optInt("versionCode", 0);
+            v.versionName = o.optString("versionName", "");
+            v.downloadUrl = absolutize(o.optString("downloadUrl", null));
+            v.fileSize = o.optString("fileSize", null);
+            v.sha256 = o.optString("sha256", null);
+            v.changelog = o.optString("changelog", "");
+            v.forceUpdate = o.optBoolean("forceUpdate", false);
+            v.minSupportedCode = o.optInt("minSupportedCode", 0);
+            if (v.versionCode <= 0 || v.downloadUrl == null) return null;
+            return v;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String urlEncode(String s) {
         try {
             return java.net.URLEncoder.encode(s, "UTF-8");

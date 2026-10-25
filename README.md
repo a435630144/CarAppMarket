@@ -11,6 +11,17 @@
 
 本项目基于 **GPL-3.0** 协议开源，完整文本见 [LICENSE](LICENSE)。
 
+## 发版与自更新（维护者须知）
+
+- **正式签名**：keystore 在仓库外（`<开发目录>\keystores\carmix-market.jks`），
+  凭据走根目录 `keystore.properties`（已 gitignore）。**该文件与备份（OneDrive\keystore-backup\）绝对不能丢失或泄露**——
+  丢失=永远无法覆盖升级；泄露=任何人可签同签名恶意更新。仓库历史中的旧 debug.keystore 已作废，仅用于历史测试包。
+- **发版流程**：改 `app/build.gradle` 版本号 → `gradle assembleRelease` → 用后端现有上传接口传 APK
+  → `POST /api/app/release`（admin，body: versionCode/versionName/downloadUrl/sha256/changelog）→
+  老版本 App 启动时自动检查 `GET /api/app/latest` 弹横幅提示升级
+- **自更新规则**：versionCode 单调递增是唯一判据；低于 `minSupportedCode` 强更（不可关闭弹窗）；
+  下载完成后 sha256 校验，不匹配即删包
+
 ## 功能
 
 - **首页（v1.4.0 重构，对齐车机市场风格）**：左侧分类导航（热门/全部/各分类，选中高亮），

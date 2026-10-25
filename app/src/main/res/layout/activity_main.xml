@@ -43,6 +43,19 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/update_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@drawable/bg_update_banner"
+        android:padding="8dp"
+        android:textColor="@color/text_white"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <!-- 分类（热门/全部/各分类） -->
     <HorizontalScrollView
         android:layout_width="match_parent"

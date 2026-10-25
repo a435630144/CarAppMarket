@@ -2,6 +2,14 @@ plugins {
     id 'com.android.application'
 }
 
+// 正式签名凭据从根目录 keystore.properties 读取（该文件不入 git，指向仓库外的 keystore）；
+// 没有该文件（如他人 clone / CI）时 release 产物退化为未签名，构建不失败
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
 android {
     namespace 'asia.carmix.market'
     compileSdk 35
@@ -12,8 +20,8 @@ android {
         minSdk 14
         // targetSdk 28：避免分区存储；>=23 保证 Android 14+ 允许侧载安装
         targetSdk 28
-        versionCode 16
-        versionName '1.10.0'
+        versionCode 17
+        versionName '1.11.0'
         // 资源只保留中文，裁掉依赖库携带的其他语言表（低配设备省内存省体积）
         resourceConfigurations += ['zh', 'zh-rCN']
     }
@@ -25,13 +33,15 @@ android {
         shaders false
     }
 
-    // 用 debug 签名给 release 包签名，保证产物可直接安装；正式发布请替换为自己的 keystore
+    // 正式签名：见根目录 keystore.properties（勿提交）；debug 构建用本机默认调试密钥
     signingConfigs {
-        releaseDebugKey {
-            storeFile rootProject.file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
         }
     }
 
@@ -43,7 +53,9 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.releaseDebugKey
+            if (keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 

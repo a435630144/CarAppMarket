@@ -39,6 +39,18 @@
             android:textColor="@color/primary"
             android:textSize="14sp" />
 
+        <TextView
+            android:id="@+id/update_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_update_banner"
+            android:padding="8dp"
+            android:textColor="@color/text_white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

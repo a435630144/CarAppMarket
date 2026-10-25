@@ -195,6 +195,7 @@ public class MainActivity extends BaseActivity {
         buildSortButtons();
         buildDownloadCenter();
         requestNotificationPermissionIfNeeded();
+        checkSelfUpdate(false);
         // 任务注册表监听：角标随下载开始/结束实时刷新
         ApkDownloader.addCenterListener(mCenterListener);
         mAdapter.setDownloadClickListener(new SoftwareAdapter.OnDownloadClick() {
@@ -216,6 +217,132 @@ public class MainActivity extends BaseActivity {
             if (checkSelfPermission(p) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{p}, 100);
             }
+        }
+    }
+
+    // ================================ 商店自更新 ================================
+
+    private Api.AppVersion mUpdate;   // 非空 = 有可升级版本
+
+    private int selfVersionCode() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /** 启动检查：自动模式 1 小时节流，失败静默（不打扰车机启动） */
+    private void checkSelfUpdate(final boolean manual) {
+        Task.run(new Task.Background<Api.AppVersion>() {
+            @Override
+            public Api.AppVersion run() throws Exception {
+                android.content.SharedPreferences sp =
+                        getSharedPreferences("updcache", MODE_PRIVATE);
+                if (!manual && System.currentTimeMillis() - sp.getLong("last", 0) < 3600_000L) {
+                    return null;
+                }
+                sp.edit().putLong("last", System.currentTimeMillis()).apply();
+                return Api.latestApp(MainActivity.this);
+            }
+        }, new Task.Ui<Api.AppVersion>() {
+            @Override
+            public void onDone(Api.AppVersion v, Exception error) {
+                if (error != null || v == null || v.versionCode <= selfVersionCode()) return;
+                mUpdate = v;
+                applyUpdateBanner();
+                if (selfVersionCode() < v.minSupportedCode) {
+                    showForceUpdateDialog();
+                }
+            }
+        });
+    }
+
+    private void applyUpdateBanner() {
+        TextView b = (TextView) findViewById(R.id.update_banner);
+        if (mUpdate == null) {
+            b.setVisibility(View.GONE);
+            return;
+        }
+        b.setText(getString(R.string.update_banner, mUpdate.versionName));
+        b.setVisibility(View.VISIBLE);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSelfUpdate();
+            }
+        });
+    }
+
+    private void startSelfUpdate() {
+        if (mUpdate == null) return;
+        if (ApkDownloader.isActive("self-update")) {
+            Toast.makeText(this, R.string.update_downloading, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ApkDownloader.start(this, "self-update", "车软星球市场 " + mUpdate.versionName,
+                mUpdate.downloadUrl, "carmix-market-" + mUpdate.versionName + ".apk",
+                new ApkDownloader.Listener() {
+                    @Override
+                    public void onProgress(String tag, int percent) {
+                    }
+
+                    @Override
+                    public void onComplete(String tag, File file) {
+                        // sha256 校验通过才唤起安装；不匹配即删防篡改包落地
+                        if (mUpdate != null && mUpdate.sha256 != null && mUpdate.sha256.length() > 0) {
+                            String actual = sha256OfFile(file);
+                            if (actual == null || !actual.equalsIgnoreCase(mUpdate.sha256)) {
+                                file.delete();
+                                Toast.makeText(MainActivity.this, R.string.update_verify_failed,
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        try {
+                            startActivity(ApkDownloader.installIntent(MainActivity.this, file.getName()));
+                        } catch (Exception e) {
+                            Toast.makeText(MainActivity.this,
+                                    getString(R.string.install_failed, e.getMessage()),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String tag, String message) {
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /** 低于 minSupportedCode 的强制更新：不可关闭，只能更新 */
+    private void showForceUpdateDialog() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.update_force_title)
+                .setMessage(R.string.update_force_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.download, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startSelfUpdate();
+                    }
+                })
+                .show();
+    }
+
+    private static String sha256OfFile(File f) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            java.io.InputStream in = new java.io.FileInputStream(f);
+            byte[] buf = new byte[32768];
+            int n;
+            while ((n = in.read(buf)) > 0) md.update(buf, 0, n);
+            in.close();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : md.digest()) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
         }
     }
 
