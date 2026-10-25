@@ -46,6 +46,7 @@ public class ApkDownloader {
         public String tag;          // 软件 id
         public String displayName;  // 软件名
         public String fileName;     // 目标文件名
+        public String url;          // 直链（失败任务重试用）
         public volatile int state = STATE_RUNNING;
         public volatile long done;
         public volatile long total = -1;   // -1 = 未知大小
@@ -122,6 +123,17 @@ public class ApkDownloader {
                 t.cancelled = true;
             }
         }
+    }
+
+    /** 管理页「清除」：从任务列表移除失败任务（tmp 已在失败时删除） */
+    public static void dismissFailed(String tag) {
+        synchronized (sTasks) {
+            Task t = sTasks.get(tag);
+            if (t != null && t.state == STATE_FAILED) {
+                sTasks.remove(tag);
+            }
+        }
+        fireCenter();
     }
 
     public static void addCenterListener(CenterListener l) {
@@ -217,6 +229,7 @@ public class ApkDownloader {
         task.tag = tag;
         task.displayName = displayName;
         task.fileName = uniqueName;
+        task.url = url;
         synchronized (sTasks) {
             sTasks.put(tag, task);
         }

@@ -45,6 +45,33 @@ public class ImageLoader {
         File dir = new File(ctx.getApplicationContext().getCacheDir(), "images");
         if (!dir.exists()) dir.mkdirs();
         mCacheDir = dir;
+        trimDiskCache();
+    }
+
+    /** 磁盘缓存上限：超过后按最旧优先清理到 3/4（车机存储小，防无限增长） */
+    private static final long DISK_CAP_BYTES = 64L * 1024 * 1024;
+
+    private void trimDiskCache() {
+        try {
+            File[] fs = mCacheDir.listFiles();
+            if (fs == null) return;
+            long total = 0;
+            for (File f : fs) total += f.length();
+            if (total <= DISK_CAP_BYTES) return;
+            java.util.Arrays.sort(fs, new java.util.Comparator<File>() {
+                @Override
+                public int compare(File a, File b) {
+                    return Long.signum(a.lastModified() - b.lastModified());
+                }
+            });
+            long target = DISK_CAP_BYTES * 3 / 4;
+            for (File f : fs) {
+                if (total <= target) break;
+                long len = f.length();
+                if (f.delete()) total -= len;
+            }
+        } catch (Throwable ignored) {
+        }
     }
 
     public static synchronized ImageLoader get(Context ctx) {

@@ -12,8 +12,8 @@ android {
         minSdk 14
         // targetSdk 28：避免分区存储；>=23 保证 Android 14+ 允许侧载安装
         targetSdk 28
-        versionCode 14
-        versionName '1.8.1'
+        versionCode 15
+        versionName '1.9.0'
     }
 
     // 用 debug 签名给 release 包签名，保证产物可直接安装；正式发布请替换为自己的 keystore

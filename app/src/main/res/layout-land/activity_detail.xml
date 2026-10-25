@@ -317,4 +317,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:indeterminate="true" />
+
+    <include layout="@layout/view_load_error" />
 </FrameLayout>

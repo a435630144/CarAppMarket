@@ -110,6 +110,15 @@ public class DetailActivity extends BaseActivity {
 
         findViewById(R.id.d_progress).setVisibility(View.VISIBLE);
 
+        // 详情加载失败 → 页内错误态；按钮重试当前 mId（版本切换后 mId 已更新）
+        findViewById(R.id.error_view).setVisibility(View.GONE);
+        findViewById(R.id.btn_retry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadDetail();
+            }
+        });
+
         mDownloadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -218,6 +227,8 @@ public class DetailActivity extends BaseActivity {
         mDownloadedFile = null;
         mDownloadBtn.setEnabled(true);
         mDownloadBtn.setText(R.string.download);
+        findViewById(R.id.error_view).setVisibility(View.GONE);
+        findViewById(R.id.d_progress).setVisibility(View.VISIBLE);
         Task.run(new Task.Background<SoftwareItem>() {
             @Override
             public SoftwareItem run() throws Exception {
@@ -230,8 +241,8 @@ public class DetailActivity extends BaseActivity {
             public void onDone(SoftwareItem result, Exception error) {
                 findViewById(R.id.d_progress).setVisibility(View.GONE);
                 if (error != null) {
-                    toast(error.getMessage());
-                    finish();
+                    // 页内错误态 + 重试，不再自动退出页面
+                    findViewById(R.id.error_view).setVisibility(View.VISIBLE);
                     return;
                 }
                 mItem = result;

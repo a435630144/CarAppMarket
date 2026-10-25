@@ -17,6 +17,7 @@
     <string name="load_error_msg">服务器异常，连接服务器超时\n请稍后重试</string>
     <string name="retry_now">重新加载</string>
     <string name="auto_retry_hint">将每 15 秒自动重试</string>
+    <string name="offline_banner">网络不可用，正在展示离线缓存 · 点击立即重试</string>
     <string name="empty_list">暂无应用</string>
     <string name="no_search_result">没有找到相关应用</string>
     <string name="search_hint">搜索应用名称</string>
@@ -33,6 +34,8 @@
     <string name="dl_section_downloading">下载任务</string>
     <string name="dl_section_files">已下载的安装包</string>
     <string name="dl_cancel">取消</string>
+    <string name="dl_retry">重试</string>
+    <string name="dl_clear">清除</string>
     <string name="dl_install">安装</string>
     <string name="dl_delete">删除</string>
     <string name="dl_delete_confirm">确认删除该安装包？</string>

@@ -141,16 +141,28 @@ public class Api {
         public int total;
         public int page;
         public int totalPages;
+        public String raw;   // 服务器原始 JSON（供离线缓存落盘）
     }
 
     public static ListResult listSoftware(Context ctx, int page, int limit, String category) throws ApiException {
+        return listSoftware(ctx, page, limit, category, null);
+    }
+
+    public static ListResult listSoftware(Context ctx, int page, int limit,
+                                          String category, String keyword) throws ApiException {
         StringBuilder sb = new StringBuilder("/software?page=").append(page)
                 .append("&limit=").append(limit);
         if (!TextUtils.isEmpty(category)) sb.append("&category=").append(urlEncode(category));
+        if (!TextUtils.isEmpty(keyword)) sb.append("&keyword=").append(urlEncode(keyword.trim()));
         JSONObject o = getJson(ctx, sb.toString());
+        return parseList(o);
+    }
+
+    /** 解析列表响应；raw 保留原始 JSON 供磁盘缓存 */
+    public static ListResult parseList(JSONObject o) {
         ListResult r = new ListResult();
         r.total = o.optInt("total", 0);
-        r.page = o.optInt("page", page);
+        r.page = o.optInt("page", 1);
         r.totalPages = o.optInt("totalPages", 1);
         JSONArray data = o.optJSONArray("data");
         if (data != null) {
@@ -159,6 +171,7 @@ public class Api {
                 if (item != null) r.items.add(item);
             }
         }
+        r.raw = o.toString();
         return r;
     }
 

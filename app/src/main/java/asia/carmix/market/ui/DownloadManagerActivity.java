@@ -116,6 +116,8 @@ public class DownloadManagerActivity extends BaseActivity {
         ProgressBar progress = (ProgressBar) v.findViewById(R.id.t_progress);
         TextView state = (TextView) v.findViewById(R.id.t_state);
         TextView cancel = (TextView) v.findViewById(R.id.t_cancel);
+        TextView retry = (TextView) v.findViewById(R.id.t_retry);
+        TextView clear = (TextView) v.findViewById(R.id.t_clear);
 
         name.setText(t.displayName != null ? t.displayName : t.fileName);
         if (t.state == ApkDownloader.STATE_RUNNING) {
@@ -130,6 +132,8 @@ public class DownloadManagerActivity extends BaseActivity {
                 state.setText(Formatters.bytes(t.done));
             }
             cancel.setVisibility(View.VISIBLE);
+            retry.setVisibility(View.GONE);
+            clear.setVisibility(View.GONE);
             cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -143,6 +147,23 @@ public class DownloadManagerActivity extends BaseActivity {
             state.setText(getString(R.string.dl_state_failed));
             state.setTextColor(0xFFE53935);
             cancel.setVisibility(View.GONE);
+            // 失败任务：原直链重试（文件名重新预留递增，不覆盖旧产物），或清除出列
+            retry.setVisibility(View.VISIBLE);
+            clear.setVisibility(View.VISIBLE);
+            retry.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (t.url == null) return;
+                    ApkDownloader.start(DownloadManagerActivity.this, t.tag,
+                            t.displayName, t.url, t.fileName, null);
+                }
+            });
+            clear.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ApkDownloader.dismissFailed(t.tag);
+                }
+            });
         }
         return v;
     }

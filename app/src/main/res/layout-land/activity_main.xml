@@ -79,6 +79,19 @@
             android:paddingBottom="6dp" />
         <!-- 排序按钮由代码动态添加（更新/下载量/评分） -->
 
+        <TextView
+            android:id="@+id/offline_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/badge_hot_bg"
+            android:clickable="true"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="@string/offline_banner"
+            android:textColor="@color/text_white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

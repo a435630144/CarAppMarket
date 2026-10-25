@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,9 +65,12 @@ public class MainActivity extends BaseActivity {
     private View mDlCenter;      // 下载管理入口（含角标）
     private TextView mDlBadge;   // 任务数角标
     private View mErrorView;     // 加载失败错误态
+    private View mOfflineBanner; // 离线缓存展示横幅
     private boolean mLoadFailed = false;
+    private boolean mShowingCache = false;
     private final android.os.Handler mUiHandler = new android.os.Handler();
     private static final long AUTO_RETRY_MS = 15000;
+    private static final long SEARCH_DEBOUNCE_MS = 400;
 
     private final List<SoftwareItem> mAll = new ArrayList<SoftwareItem>();
     private final List<String> mCategories = new ArrayList<String>();
@@ -156,13 +160,23 @@ public class MainActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 mQuery = s.toString().trim().toLowerCase(Locale.CHINA);
-                applyFilter();
+                // 防抖后走服务端搜索（旧后端忽略 keyword 参数时由本地过滤兜底）
+                mUiHandler.removeCallbacks(mSearchRun);
+                mUiHandler.postDelayed(mSearchRun, SEARCH_DEBOUNCE_MS);
             }
         });
         // 旋转重建：恢复后的关键词回填搜索框，保持框与列表一致
         if (mQuery.length() > 0) {
             search.setText(mQuery);
         }
+
+        mOfflineBanner = findViewById(R.id.offline_banner);
+        mOfflineBanner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                manualReload();
+            }
+        });
 
         findViewById(R.id.btn_login).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,6 +218,14 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
+
+    /** 搜索防抖任务：触发服务端搜索（keyword 随列表请求下发） */
+    private final Runnable mSearchRun = new Runnable() {
+        @Override
+        public void run() {
+            loadPage(1, true);
+        }
+    };
 
     /** 网格发起的下载：失败给出提示（进度走通知与下载管理页，完成由通知引导安装） */
     private final ApkDownloader.Listener mCardDlListener = new ApkDownloader.Listener() {
@@ -393,7 +415,10 @@ public class MainActivity extends BaseActivity {
                     r.totalPages = 1;
                     return r;
                 }
-                return Api.listSoftware(MainActivity.this, page, PAGE_SIZE, category);
+                // 服务端搜索：keyword 随请求下发（新后端按名称/介绍过滤；
+                // 旧后端忽略该参数时由本地过滤兜底）
+                return Api.listSoftware(MainActivity.this, page, PAGE_SIZE, category,
+                        mQuery.length() > 0 ? mQuery : null);
             }
         }, new Task.Ui<Api.ListResult>() {
             @Override
@@ -404,20 +429,31 @@ public class MainActivity extends BaseActivity {
                 mLoading.setVisibility(View.GONE);
                 mFooter.setVisibility(View.GONE);
                 if (error != null) {
-                    // 失败即清空：离线/异常时页面为干净错误态，无任何详情入口
-                    mLoadFailed = true;
-                    mAll.clear();
-                    applyFilter();
-                    startAutoRetry();
+                    if (reset) {
+                        // 首屏/切分类失败：有缓存先展示离线数据，没有才进错误态
+                        if (mQuery.length() == 0) {
+                            tryShowCachedList(category);
+                        } else {
+                            showErrorState();
+                        }
+                    } else {
+                        // 分页追加失败：保留已加载数据，仅提示
+                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                     return;
                 }
                 mLoadFailed = false;
+                mShowingCache = false;
                 stopAutoRetry();
                 if (reset) mAll.clear();
                 mAll.addAll(result.items);
                 mPage = result.page;
                 mTotalPages = Math.max(result.totalPages, 1);
                 applyFilter();
+                // 首屏成功且非搜索：落盘离线缓存（供断网冷启动展示）
+                if (reset && mQuery.length() == 0 && result.raw != null) {
+                    writeListCache(category, result.raw);
+                }
             }
         });
     }
@@ -543,20 +579,24 @@ public class MainActivity extends BaseActivity {
         if (mQuery.length() == 0) {
             shown.addAll(mAll);
         } else {
+            // 本地过滤按名称+介绍：新后端已按 keyword 服务端过滤（结果为超集，再过滤无损）；
+            // 旧后端忽略 keyword 时，此过滤保证搜索仍可用
             for (SoftwareItem s : mAll) {
-                if (s.name != null && s.name.toLowerCase(Locale.CHINA).contains(mQuery)) {
+                if (contains(s.name, mQuery) || contains(s.description, mQuery)) {
                     shown.add(s);
                 }
             }
         }
         sortShown(shown);
         mAdapter.setItems(shown);
-        // 错误态优先：失败时页面只渲染错误 UI（无列表=无详情入口，无搜索通道）
+        // 错误态优先；离线缓存次之（横幅提示），正常态走空态文案
         if (mLoadFailed) {
+            mOfflineBanner.setVisibility(View.GONE);
             mEmpty.setVisibility(View.GONE);
             mErrorView.setVisibility(View.VISIBLE);
         } else {
             mErrorView.setVisibility(View.GONE);
+            mOfflineBanner.setVisibility(mShowingCache ? View.VISIBLE : View.GONE);
             if (shown.isEmpty()) {
                 mEmpty.setText(mQuery.length() > 0 ? R.string.no_search_result : R.string.empty_list);
                 mEmpty.setVisibility(View.VISIBLE);
@@ -564,6 +604,74 @@ public class MainActivity extends BaseActivity {
                 mEmpty.setVisibility(View.GONE);
             }
         }
+    }
+
+    private static boolean contains(String text, String query) {
+        return text != null && text.toLowerCase(Locale.CHINA).contains(query);
+    }
+
+    private void showErrorState() {
+        mLoadFailed = true;
+        mShowingCache = false;
+        mAll.clear();
+        applyFilter();
+        startAutoRetry();
+    }
+
+    // ================================ 离线列表缓存 ================================
+
+    private File listCacheFile(String category) {
+        String key = CAT_HOT.equals(category) ? "hot" : (category == null ? "all" : category);
+        return new File(getCacheDir(), "listcache_" + asia.carmix.market.util.ImageLoader.md5(key) + ".json");
+    }
+
+    /** 首屏成功且非搜索：异步落盘原始响应，供断网冷启动展示 */
+    private void writeListCache(final String category, final String raw) {
+        final File f = listCacheFile(category);
+        Task.run(new Task.Background<Object>() {
+            @Override
+            public Object run() throws Exception {
+                java.io.FileOutputStream out = new java.io.FileOutputStream(f);
+                out.write(raw.getBytes("UTF-8"));
+                out.close();
+                return null;
+            }
+        }, null);
+    }
+
+    /** 加载失败时尝试展示上次缓存（横幅标记离线）；无缓存进错误态 */
+    private void tryShowCachedList(final String category) {
+        final File f = listCacheFile(category);
+        Task.run(new Task.Background<Api.ListResult>() {
+            @Override
+            public Api.ListResult run() throws Exception {
+                if (!f.exists()) return null;
+                StringBuilder sb = new StringBuilder();
+                java.io.BufferedReader in = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(new java.io.FileInputStream(f), "UTF-8"));
+                String line;
+                while ((line = in.readLine()) != null) sb.append(line);
+                in.close();
+                return Api.parseList(new org.json.JSONObject(sb.toString()));
+            }
+        }, new Task.Ui<Api.ListResult>() {
+            @Override
+            public void onDone(Api.ListResult result, Exception error) {
+                if (result != null && !result.items.isEmpty()) {
+                    mLoadFailed = false;
+                    mShowingCache = true;
+                    mAll.clear();
+                    mAll.addAll(result.items);
+                    mPage = result.page;
+                    mTotalPages = Math.max(result.totalPages, 1);
+                    applyFilter();
+                    // 缓存展示期间保持静默自动重试，网络恢复自动换回在线数据
+                    startAutoRetry();
+                } else {
+                    showErrorState();
+                }
+            }
+        });
     }
 
     // ================================ 失败自动重试 ================================
@@ -588,6 +696,7 @@ public class MainActivity extends BaseActivity {
     /** 手动/自动重试：重抓列表与分类 */
     private void manualReload() {
         stopAutoRetry();
+        mShowingCache = false;
         loadPage(1, true);
         loadCategories();
     }
