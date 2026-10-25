@@ -39,6 +39,7 @@
     <string name="dl_empty">暂无下载任务和安装包</string>
     <string name="dl_state_failed">下载失败</string>
     <string name="dl_cancelled">已取消</string>
+    <string name="notify_cancelled">已取消下载</string>
     <string name="dl_deleted">已删除</string>
     <string name="versions_title">版本</string>
     <string name="changelog_title">更新日志</string>

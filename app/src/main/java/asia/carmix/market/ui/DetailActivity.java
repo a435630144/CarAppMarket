@@ -214,6 +214,10 @@ public class DetailActivity extends BaseActivity {
     // ================================ 详情 ================================
 
     private void loadDetail() {
+        // 切版本/重进：清掉上一版本的下载完成状态，避免「安装」指向旧包
+        mDownloadedFile = null;
+        mDownloadBtn.setEnabled(true);
+        mDownloadBtn.setText(R.string.download);
         Task.run(new Task.Background<SoftwareItem>() {
             @Override
             public SoftwareItem run() throws Exception {
@@ -232,14 +236,14 @@ public class DetailActivity extends BaseActivity {
                 }
                 mItem = result;
                 bindDetail();
-                loadReviews(true);
-                loadUpdateStatus();
-                // 若已下载过，按钮直接显示“安装”
+                // 当前版本若已下载过，按钮直接显示「安装」；否则保持「下载」
                 String fn = defaultFileName(mItem);
                 if (fn != null && new File(ApkDownloader.downloadsDir(DetailActivity.this), fn).exists()) {
                     mDownloadedFile = fn;
                     mDownloadBtn.setText(R.string.install);
                 }
+                loadReviews(true);
+                loadUpdateStatus();
             }
         });
     }

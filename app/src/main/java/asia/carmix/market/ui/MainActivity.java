@@ -74,6 +74,7 @@ public class MainActivity extends BaseActivity {
     private int mPage = 1;
     private int mTotalPages = 1;
     private boolean mLoadingMore = false;
+    private int mReqGen = 0;          // 请求代际：切分类/重置时递增，旧响应一律作废
     private String mQuery = "";
 
     // 每个排序键独立三态；激活一个时其余归零
@@ -134,7 +135,7 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onScroll(AbsListView view, int firstVisible, int visibleCount, int totalCount) {
-                if (!mLoadingMore && totalCount > 0
+                if (!mLoadingMore && !mLoadFailed && totalCount > 0
                         && firstVisible + visibleCount >= totalCount - 3
                         && mPage < mTotalPages && mQuery.length() == 0) {
                     loadPage(mPage + 1, false);
@@ -158,6 +159,10 @@ public class MainActivity extends BaseActivity {
                 applyFilter();
             }
         });
+        // 旋转重建：恢复后的关键词回填搜索框，保持框与列表一致
+        if (mQuery.length() > 0) {
+            search.setText(mQuery);
+        }
 
         findViewById(R.id.btn_login).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,11 +180,14 @@ public class MainActivity extends BaseActivity {
 
         buildSortButtons();
         buildDownloadCenter();
+        requestNotificationPermissionIfNeeded();
+        // 任务注册表监听：角标随下载开始/结束实时刷新
+        ApkDownloader.addCenterListener(mCenterListener);
         mAdapter.setDownloadClickListener(new SoftwareAdapter.OnDownloadClick() {
             @Override
             public void onDownloadClick(SoftwareItem item, View origin) {
                 boolean started = asia.carmix.market.util.DownloadStarter.start(
-                        MainActivity.this, item, sToastListener);
+                        MainActivity.this, item, mCardDlListener);
                 if (started) flyToDownloadCenter(origin);
             }
         });
@@ -187,21 +195,31 @@ public class MainActivity extends BaseActivity {
         loadCategories();
     }
 
-    /** 网格发起的下载：完成/失败用轻提示，进度走通知与下载管理页 */
-    private static final ApkDownloader.Listener sToastListener =
-            new ApkDownloader.Listener() {
-                @Override
-                public void onProgress(String tag, int percent) {
-                }
+    /** Android 13+ 通知权限：下载进度/完成通知需要，启动时一次性请求 */
+    private void requestNotificationPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            String p = android.Manifest.permission.POST_NOTIFICATIONS;
+            if (checkSelfPermission(p) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{p}, 100);
+            }
+        }
+    }
 
-                @Override
-                public void onComplete(String tag, java.io.File file) {
-                }
+    /** 网格发起的下载：失败给出提示（进度走通知与下载管理页，完成由通知引导安装） */
+    private final ApkDownloader.Listener mCardDlListener = new ApkDownloader.Listener() {
+        @Override
+        public void onProgress(String tag, int percent) {
+        }
 
-                @Override
-                public void onError(String tag, String message) {
-                }
-            };
+        @Override
+        public void onComplete(String tag, java.io.File file) {
+        }
+
+        @Override
+        public void onError(String tag, String message) {
+            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     private final ApkDownloader.CenterListener mCenterListener =
             new ApkDownloader.CenterListener() {
@@ -352,7 +370,9 @@ public class MainActivity extends BaseActivity {
     // ================================ 数据加载 ================================
 
     private void loadPage(final int page, final boolean reset) {
-        if (mLoadingMore) return;
+        // 重置请求（首屏/切分类）总是放行并作废在途请求；仅分页追加被并发守卫
+        if (!reset && mLoadingMore) return;
+        final int gen = ++mReqGen;
         mLoadingMore = true;
         if (reset) {
             mLoading.setVisibility(View.VISIBLE);
@@ -378,6 +398,8 @@ public class MainActivity extends BaseActivity {
         }, new Task.Ui<Api.ListResult>() {
             @Override
             public void onDone(Api.ListResult result, Exception error) {
+                // 已被更新的请求作废：不碰列表、不碰加载态
+                if (gen != mReqGen) return;
                 mLoadingMore = false;
                 mLoading.setVisibility(View.GONE);
                 mFooter.setVisibility(View.GONE);

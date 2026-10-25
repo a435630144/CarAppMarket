@@ -70,6 +70,9 @@ public class ApkDownloader {
 
     private static final String CHANNEL_ID = "apk_download";
     private static final Map<String, Task> sTasks = new HashMap<String, Task>();
+    /** 下载中文件名预留：并发同名下载不会算出同一个名字互相写坏 tmp */
+    private static final java.util.Set<String> sReservedNames =
+            new java.util.HashSet<String>();
     private static final List<CenterListener> sCenterListeners =
             new ArrayList<CenterListener>();
     private static final android.os.Handler sMain =
@@ -147,6 +150,8 @@ public class ApkDownloader {
     }
 
     private static void finishTask(Task t, int finalState) {
+        // 终态统一释放文件名预留（DONE 后文件在磁盘上，后续靠存在性检查递增）
+        releaseReserved(t.fileName);
         synchronized (sTasks) {
             if (finalState == STATE_CANCELLED || t.state == STATE_RUNNING) {
                 if (finalState == STATE_CANCELLED) {
@@ -205,8 +210,9 @@ public class ApkDownloader {
         }
         final Context app = ctx.getApplicationContext();
         // 同名安装包已存在（重复下载同一软件）→ 加 (1)(2) 后缀，绝不覆盖旧文件，
-        // 保证每次下载的产物都可被管理页追踪，不产生脱离管理的遗留文件
-        final String uniqueName = uniqueFileName(app, fileName);
+        // 保证每次下载的产物都可被管理页追踪，不产生脱离管理的遗留文件；
+        // 并发下载同一文件名时按预留集去重（否则两个任务会算出同一个名字）
+        final String uniqueName = reserveFileName(app, fileName);
         final Task task = new Task();
         task.tag = tag;
         task.displayName = displayName;
@@ -249,11 +255,11 @@ public class ApkDownloader {
                 }
                 if (task.cancelled) {
                     tmp.delete();
-                    notifyFail(app, nm, notifId, task.displayName);
+                    notifyState(app, nm, notifId, task.displayName, "已取消下载");
                     finishTask(task, STATE_CANCELLED);
                 } else {
                     tmp.delete();
-                    notifyFail(app, nm, notifId, task.displayName);
+                    notifyState(app, nm, notifId, task.displayName, "下载失败");
                     finishTask(task, STATE_FAILED);
                     final Exception fe = error;
                     if (listener != null) {
@@ -270,10 +276,10 @@ public class ApkDownloader {
         }, "apk-download").start();
     }
 
-    /** 目标名冲突时生成 base(1).apk / base(2).apk … */
-    static String uniqueFileName(Context ctx, String desired) {
+    /** 目标名冲突时生成 base(1).apk / base(2).apk …，并对进行中的任务预留名字 */
+    static String reserveFileName(Context ctx, String desired) {
         File dir = downloadsDir(ctx);
-        if (!new File(dir, desired).exists()) return desired;
+        String candidate = desired;
         String base = desired;
         String ext = "";
         int dot = desired.lastIndexOf('.');
@@ -281,11 +287,24 @@ public class ApkDownloader {
             base = desired.substring(0, dot);
             ext = desired.substring(dot);
         }
-        for (int i = 1; i < 1000; i++) {
-            String c = base + "(" + i + ")" + ext;
-            if (!new File(dir, c).exists()) return c;
+        synchronized (sReservedNames) {
+            int i = 0;
+            while (true) {
+                if (!new File(dir, candidate).exists()
+                        && !sReservedNames.contains(candidate)) {
+                    sReservedNames.add(candidate);
+                    return candidate;
+                }
+                i++;
+                candidate = base + "(" + i + ")" + ext;
+            }
         }
-        return "dl-" + System.currentTimeMillis() + ext;
+    }
+
+    private static void releaseReserved(String fileName) {
+        synchronized (sReservedNames) {
+            sReservedNames.remove(fileName);
+        }
     }
 
     /** 单次下载执行（含续传），完成后 tmp 即完整文件。异常时关闭并抛出。 */
@@ -415,8 +434,9 @@ public class ApkDownloader {
         nm.notify(id, b.build());
     }
 
-    private static void notifyFail(Context app, NotificationManager nm, int id, String displayName) {
-        Notification.Builder b = baseBuilder(app, "下载失败");
+    private static void notifyState(Context app, NotificationManager nm, int id,
+                                    String displayName, String stateText) {
+        Notification.Builder b = baseBuilder(app, stateText);
         b.setContentText(displayName);
         nm.notify(id, b.build());
     }

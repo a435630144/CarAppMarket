@@ -104,9 +104,10 @@ public class ImageLoader {
             Bitmap b = sampleDecode(f.getAbsolutePath(), maxDim);
             if (b != null) return b;
         }
+        okhttp3.Response resp = null;
         try {
             okhttp3.Request req = new okhttp3.Request.Builder().url(absUrl).build();
-            okhttp3.Response resp = Api.client().newCall(req).execute();
+            resp = Api.client().newCall(req).execute();
             if (!resp.isSuccessful()) return null;
             InputStream in = resp.body().byteStream();
             File tmp = new File(mCacheDir, key + ".tmp");
@@ -115,13 +116,14 @@ public class ImageLoader {
             int n;
             while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
             out.close();
-            in.close();
-            resp.close();
             if (!tmp.renameTo(f)) {
                 tmp.delete();
             }
         } catch (Throwable ignored) {
             return null;
+        } finally {
+            // 无论成功失败都释放连接（此前失败分支泄漏）
+            if (resp != null) resp.close();
         }
         return sampleDecode(f.getAbsolutePath(), maxDim);
     }

@@ -81,6 +81,11 @@ public class Api {
             resp = client().newCall(rb.build()).execute();
             String text = resp.body() == null ? "" : resp.body().string();
             if (!resp.isSuccessful()) {
+                // 登录态过期：清掉本地 token，提示重新登录（后续请求按游客身份进行）
+                if (resp.code() == 401) {
+                    Session.clear(ctx);
+                    throw new ApiException(401, "登录已过期，请重新登录");
+                }
                 throw new ApiException(resp.code(), errorMessage(text, "请求失败 (" + resp.code() + ")"));
             }
             return text;
