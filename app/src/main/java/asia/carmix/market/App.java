@@ -1,6 +1,7 @@
 package asia.carmix.market;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Build;
 
 import java.security.Security;
@@ -42,5 +43,36 @@ public class App extends Application {
 
     public static boolean isConscryptReady() {
         return sConscryptReady;
+    }
+
+    // ================================ 昼夜模式 ================================
+
+    /** 外观模式：system=跟随系统 / light=浅色 / dark=深色 */
+    public static final String THEME_SYSTEM = "system";
+    public static final String THEME_LIGHT = "light";
+    public static final String THEME_DARK = "dark";
+
+    public static String getThemeMode(Context ctx) {
+        return ctx.getApplicationContext()
+                .getSharedPreferences("appearance", Context.MODE_PRIVATE)
+                .getString("mode", THEME_SYSTEM);
+    }
+
+    public static void setThemeMode(Context ctx, String mode) {
+        ctx.getApplicationContext()
+                .getSharedPreferences("appearance", Context.MODE_PRIVATE)
+                .edit()
+                .putString("mode", mode)
+                .apply();
+    }
+
+    /** 当前是否应使用深色主题（手动深色，或跟随系统且系统处于夜间） */
+    public static boolean isDarkMode(Context ctx) {
+        String mode = getThemeMode(ctx);
+        if (THEME_DARK.equals(mode)) return true;
+        if (THEME_LIGHT.equals(mode)) return false;
+        int mask = ctx.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        return mask == android.content.res.Configuration.UI_MODE_NIGHT_YES;
     }
 }

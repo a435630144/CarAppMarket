@@ -14,4 +14,10 @@
     <style name="AppActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/text_white</item>
     </style>
+
+    <!-- 深色模式：Holo 暗色基底，窗口/卡片底色经 values-night 自动覆盖 -->
+    <style name="AppThemeDark" parent="android:Theme.Holo">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:actionBarStyle">@style/AppActionBar</item>
+    </style>
 </resources>

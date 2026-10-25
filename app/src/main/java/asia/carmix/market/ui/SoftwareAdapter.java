@@ -200,13 +200,8 @@ public class SoftwareAdapter extends BaseAdapter {
             badge.setTextColor(0xFFFFFFFF);
             vis = View.VISIBLE;
         } else if (s.collectionId != null) {
-            // 合集卡片：点进详情可切换版本
+            // 合集卡片：点进详情可切换版本（热门已升级为独立标签页，卡片不再重复标注）
             badge.setText(R.string.badge_collection);
-            badge.setBackgroundResource(R.drawable.badge_bg);
-            badge.setTextColor(0xFF2563EB);
-            vis = View.VISIBLE;
-        } else if (s.isHot) {
-            badge.setText(R.string.badge_hot);
             badge.setBackgroundResource(R.drawable.badge_bg);
             badge.setTextColor(0xFF2563EB);
             vis = View.VISIBLE;
@@ -214,14 +209,25 @@ public class SoftwareAdapter extends BaseAdapter {
         badge.setVisibility(vis);
     }
 
-    /** 类型标识：车机版 / 手机版（后端 type 字段），空则隐藏 */
-    private void bindType(TextView tag, SoftwareItem s) {
-        if (s.type != null && s.type.length() > 0 && !"null".equalsIgnoreCase(s.type)) {
-            tag.setText(s.type);
-            tag.setVisibility(View.VISIBLE);
-        } else {
+    /** 类型标识：车机版=蓝 / 手机版=绿，其他值隐藏。卡片与详情页共用 */
+    public static void bindTypeTag(TextView tag, String type) {
+        if (type == null || type.length() == 0 || "null".equalsIgnoreCase(type)) {
             tag.setVisibility(View.GONE);
+            return;
         }
+        tag.setVisibility(View.VISIBLE);
+        if (type.contains("手机")) {
+            tag.setBackgroundResource(R.drawable.badge_type_green);
+            tag.setTextColor(0xFF059669);
+        } else {
+            tag.setBackgroundResource(R.drawable.badge_type);
+            tag.setTextColor(0xFF2563EB);
+        }
+        tag.setText(type);
+    }
+
+    private void bindType(TextView tag, SoftwareItem s) {
+        bindTypeTag(tag, s.type);
     }
 
     private void bindIcon(ImageView icon, SoftwareItem s) {

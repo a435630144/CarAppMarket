@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 深色模式调色板：与 values/colors.xml 同名覆盖，夜间资源限定符自动生效 -->
+    <color name="primary">#3B82F6</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="bg">#0E1420</color>
+    <color name="card">#1A2232</color>
+    <color name="text_main">#E6EAF2</color>
+    <color name="text_sub">#8B95A8</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="divider">#232D40</color>
+    <color name="input_stroke">#2C3752</color>
+    <color name="disabled">#4A5470</color>
+</resources>

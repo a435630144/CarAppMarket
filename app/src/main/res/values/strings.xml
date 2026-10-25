@@ -91,5 +91,10 @@
     <string name="email_required">请输入邮箱</string>
     <string name="password_too_short">密码至少6位</string>
     <string name="register_ok">注册成功，已自动登录</string>
+    <string name="appearance">外观（昼夜模式）</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色模式</string>
+    <string name="theme_dark">深色模式</string>
+    <string name="theme_switched">外观已切换</string>
     <string name="review_content_hint">说说你的使用感受（可选，500字以内）</string>
 </resources>

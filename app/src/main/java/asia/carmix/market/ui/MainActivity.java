@@ -1,6 +1,8 @@
 package asia.carmix.market.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Locale;
 
+import asia.carmix.market.App;
 import asia.carmix.market.R;
 import asia.carmix.market.Session;
 import asia.carmix.market.api.Api;
@@ -39,7 +42,7 @@ import asia.carmix.market.util.Task;
  * 首页：左侧分类导航（热门/全部/各分类）+ 右侧卡片网格 + 排序栏 + 本地搜索。
  * 排序为客户端排序（后端列表接口暂无 sort 参数），作用于已加载的分页数据。
  */
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 
     /** 热门伪分类标记（真实分类名不可能与之冲突） */
     private static final String CAT_HOT = "\u0001hot";
@@ -580,7 +583,38 @@ public class MainActivity extends Activity {
         } else if (id == R.id.action_exit) {
             finish();
             return true;
+        } else if (id == R.id.action_appearance) {
+            showAppearanceDialog();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** 昼夜模式三选一：跟随系统 / 浅色 / 深色，选择后立即重建生效 */
+    private void showAppearanceDialog() {
+        final String[] modes = {App.THEME_SYSTEM, App.THEME_LIGHT, App.THEME_DARK};
+        final String[] labels = {getString(R.string.theme_system), getString(R.string.theme_light),
+                getString(R.string.theme_dark)};
+        final String current = App.getThemeMode(this);
+        int checked = 0;
+        for (int i = 0; i < modes.length; i++) {
+            if (modes[i].equals(current)) checked = i;
+        }
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.appearance)
+                .setSingleChoiceItems(labels, checked, new android.content.DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        if (!modes[which].equals(App.getThemeMode(MainActivity.this))) {
+                            App.setThemeMode(MainActivity.this, modes[which]);
+                            Toast.makeText(MainActivity.this, R.string.theme_switched,
+                                    Toast.LENGTH_SHORT).show();
+                            recreate();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 }

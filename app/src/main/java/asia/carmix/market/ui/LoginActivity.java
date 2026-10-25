@@ -17,7 +17,7 @@ import asia.carmix.market.api.Api;
 import asia.carmix.market.model.User;
 import asia.carmix.market.util.Task;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity {
 
     private EditText mEmail, mPassword;
     private View mSubmit;

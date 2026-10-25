@@ -35,7 +35,7 @@ import asia.carmix.market.util.Task;
 /**
  * 详情页：信息展示 + 截图 + 评价 + 下载/安装。
  */
-public class DetailActivity extends Activity {
+public class DetailActivity extends BaseActivity {
 
     public static final String EXTRA_ID = "id";
 
@@ -246,13 +246,8 @@ public class DetailActivity extends Activity {
 
     private void bindDetail() {
         getActionBar().setTitle(mItem.name);
-        // 类型标识（车机版/手机版）
-        if (mItem.type != null && mItem.type.length() > 0 && !"null".equalsIgnoreCase(mItem.type)) {
-            mTypeTag.setText(mItem.type);
-            mTypeTag.setVisibility(View.VISIBLE);
-        } else {
-            mTypeTag.setVisibility(View.GONE);
-        }
+        // 类型标识（车机版=蓝 / 手机版=绿），与卡片共用同一配色规则
+        SoftwareAdapter.bindTypeTag(mTypeTag, mItem.type);
         if (mItem.thumbnailUrl == null || mItem.thumbnailUrl.length() == 0 || "null".equals(mItem.thumbnailUrl)) {
             mIcon.setImageDrawable(new asia.carmix.market.util.LetterDrawable(mItem.name));
         } else {

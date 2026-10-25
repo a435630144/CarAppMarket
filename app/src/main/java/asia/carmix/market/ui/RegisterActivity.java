@@ -19,7 +19,7 @@ import asia.carmix.market.util.Task;
 /**
  * 注册：邮箱 + 验证码（邮件下发）+ 用户名 + 密码（≥6位）。
  */
-public class RegisterActivity extends Activity {
+public class RegisterActivity extends BaseActivity {
 
     private EditText mEmail, mCode, mUsername, mPassword;
     private TextView mSendCode;

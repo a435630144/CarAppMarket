@@ -25,7 +25,7 @@ import asia.carmix.market.util.Formatters;
 /**
  * 下载管理页：上半区正在下载的任务（进度/速度/取消），下半区已落盘安装包（安装/删除）。
  */
-public class DownloadManagerActivity extends Activity {
+public class DownloadManagerActivity extends BaseActivity {
 
     private LinearLayout mList;
     private TextView mEmpty;
