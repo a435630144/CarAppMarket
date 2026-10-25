@@ -75,13 +75,16 @@ public class ImageLoader {
     }
 
     public static synchronized ImageLoader get(Context ctx) {
-        if (sInstance == null) sInstance = new ImageLoader(ctx.getApplicationContext());
+        if (sInstance == null) {
+            sInstance = new ImageLoader(ctx.getApplicationContext());
+            asia.carmix.market.App.setImageLoader(sInstance);
+        }
         return sInstance;
     }
 
-    /** 列表图标加载 */
+    /** 列表图标加载：64~96dp 视图按 256px 上限解码（原 400px，省一半以上位图内存） */
     public void display(ImageView view, String url, int placeholderRes) {
-        display(view, url, placeholderRes, 400);
+        display(view, url, placeholderRes, 256);
     }
 
     public void display(final ImageView view, final String url, final int placeholderRes, final int maxDim) {
@@ -124,6 +127,13 @@ public class ImageLoader {
         });
     }
 
+    /** 供 App.onTrimMemory 调用：低内存时清空位图缓存（按需自动重建） */
+    public void trimMemory(int level) {
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            mMemory.evictAll();
+        }
+    }
+
     /** 同步解码：内存 → 磁盘 → 网络（下载后写磁盘） */
     private Bitmap decode(String key, String absUrl, int maxDim) {
         File f = new File(mCacheDir, key);
@@ -146,6 +156,8 @@ public class ImageLoader {
             if (!tmp.renameTo(f)) {
                 tmp.delete();
             }
+            // 每次写盘后顺手查一次容量上限（已在后台线程，开销可忽略）
+            trimDiskCache();
         } catch (Throwable ignored) {
             return null;
         } finally {

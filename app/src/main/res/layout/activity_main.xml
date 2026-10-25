@@ -101,7 +101,9 @@
             android:divider="@null"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:scrollbars="none" />
+            android:scrollbars="none"
+                android:scrollingCache="false"
+                android:cacheColorHint="@android:color/transparent" />
 
         <ProgressBar
             android:id="@+id/loading"

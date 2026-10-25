@@ -45,6 +45,21 @@ public class App extends Application {
         return sConscryptReady;
     }
 
+    /** 车机低内存场景：系统告警即释放位图缓存（显示时按需自动重建） */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            if (sImageLoader != null) sImageLoader.trimMemory(level);
+        }
+    }
+
+    private static asia.carmix.market.util.ImageLoader sImageLoader;
+
+    public static void setImageLoader(asia.carmix.market.util.ImageLoader loader) {
+        sImageLoader = loader;
+    }
+
     // ================================ 昼夜模式 ================================
 
     /** 外观模式：system=跟随系统 / light=浅色 / dark=深色 */

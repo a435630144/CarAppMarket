@@ -111,6 +111,8 @@
                 android:paddingTop="2dp"
                 android:paddingBottom="12dp"
                 android:scrollbars="none"
+                android:scrollingCache="false"
+                android:cacheColorHint="@android:color/transparent"
                 android:stretchMode="columnWidth"
                 android:verticalSpacing="10dp" />
 
