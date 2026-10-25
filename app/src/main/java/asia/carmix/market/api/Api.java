@@ -264,6 +264,37 @@ public class Api {
         }
     }
 
+    // ============================ 更新请求（需要升级反馈） ============================
+
+    public static class UpdateRequestStatus {
+        public int total;
+        public boolean requested;
+    }
+
+    /** 更新请求状态：total 人数 + 当前访客/用户是否已请求 */
+    public static UpdateRequestStatus updateRequestStatus(Context ctx, String id) throws ApiException {
+        JSONObject o = getJson(ctx, "/software/" + id + "/update-request?visitorId="
+                + urlEncode(asia.carmix.market.util.Visitor.id(ctx)));
+        UpdateRequestStatus s = new UpdateRequestStatus();
+        s.total = o.optInt("total", 0);
+        s.requested = o.optBoolean("requested", false);
+        return s;
+    }
+
+    /** 提交「需要升级」反馈（幂等，游客可提交），返回 {requested, total} */
+    public static UpdateRequestStatus requestUpdate(Context ctx, String id) throws ApiException {
+        JSONObject body = new JSONObject();
+        try {
+            body.put("visitorId", asia.carmix.market.util.Visitor.id(ctx));
+        } catch (Exception ignored) {
+        }
+        JSONObject o = postJson(ctx, "/software/" + id + "/update-request", body);
+        UpdateRequestStatus s = new UpdateRequestStatus();
+        s.total = o.optInt("total", 0);
+        s.requested = o.optBoolean("requested", true);
+        return s;
+    }
+
     // ================================ 认证模块 ================================
 
     public static class AuthResult {

@@ -89,6 +89,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
+            h.typeTag = (TextView) convertView.findViewById(R.id.type_tag);
             h.dlBtn = (TextView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
@@ -103,6 +104,7 @@ public class SoftwareAdapter extends BaseAdapter {
         if (d.length() > 0) stats += " · " + d;
         h.stats.setText(stats);
         bindBadge(h.badge, s);
+        bindType(h.typeTag, s);
         bindIcon(h.icon, s);
         bindDownload(h.dlBtn, s);
         return convertView;
@@ -115,6 +117,7 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
+        TextView typeTag;
         TextView dlBtn;
     }
 
@@ -131,6 +134,7 @@ public class SoftwareAdapter extends BaseAdapter {
             h.rating = (RatingBar) convertView.findViewById(R.id.rating);
             h.stats = (TextView) convertView.findViewById(R.id.stats);
             h.badge = (TextView) convertView.findViewById(R.id.badge);
+            h.typeTag = (TextView) convertView.findViewById(R.id.type_tag);
             h.dlBtn = (TextView) convertView.findViewById(R.id.btn_download);
             convertView.setTag(h);
         } else {
@@ -148,6 +152,7 @@ public class SoftwareAdapter extends BaseAdapter {
         if (d.length() > 0) stats += " · " + d + "收录";
         h.stats.setText(stats);
         bindBadge(h.badge, s);
+        bindType(h.typeTag, s);
         bindIcon(h.icon, s);
         bindDownload(h.dlBtn, s);
         return convertView;
@@ -160,6 +165,7 @@ public class SoftwareAdapter extends BaseAdapter {
         RatingBar rating;
         TextView stats;
         TextView badge;
+        TextView typeTag;
         TextView dlBtn;
     }
 
@@ -190,16 +196,32 @@ public class SoftwareAdapter extends BaseAdapter {
         int vis = View.GONE;
         if (s.isOfficial) {
             badge.setText(R.string.badge_official);
+            badge.setBackgroundResource(R.drawable.badge_official_solid);
+            badge.setTextColor(0xFFFFFFFF);
             vis = View.VISIBLE;
         } else if (s.collectionId != null) {
             // 合集卡片：点进详情可切换版本
             badge.setText(R.string.badge_collection);
+            badge.setBackgroundResource(R.drawable.badge_bg);
+            badge.setTextColor(0xFF2563EB);
             vis = View.VISIBLE;
         } else if (s.isHot) {
             badge.setText(R.string.badge_hot);
+            badge.setBackgroundResource(R.drawable.badge_bg);
+            badge.setTextColor(0xFF2563EB);
             vis = View.VISIBLE;
         }
         badge.setVisibility(vis);
+    }
+
+    /** 类型标识：车机版 / 手机版（后端 type 字段），空则隐藏 */
+    private void bindType(TextView tag, SoftwareItem s) {
+        if (s.type != null && s.type.length() > 0 && !"null".equalsIgnoreCase(s.type)) {
+            tag.setText(s.type);
+            tag.setVisibility(View.VISIBLE);
+        } else {
+            tag.setVisibility(View.GONE);
+        }
     }
 
     private void bindIcon(ImageView icon, SoftwareItem s) {

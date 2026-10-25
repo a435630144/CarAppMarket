@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -51,6 +52,9 @@ public class DetailActivity extends Activity {
     private View mReviewsHeader, mReviewEmpty, mWriteReview, mVersionSection, mChangelogSection;
     private LinearLayout mVersionRow, mChangelogRow;
     private TextView mReviewSummary;
+    private TextView mTypeTag;
+    private MenuItem mUpdateItem;
+    private asia.carmix.market.api.Api.UpdateRequestStatus mUpdateReq;
 
     private ApkDownloader.Listener mDownloadListener = new ApkDownloader.Listener() {
         @Override
@@ -98,6 +102,7 @@ public class DetailActivity extends Activity {
         mReviewEmpty = findViewById(R.id.d_review_empty);
         mWriteReview = findViewById(R.id.d_btn_review);
         mReviewSummary = (TextView) findViewById(R.id.d_review_summary);
+        mTypeTag = (TextView) findViewById(R.id.d_type_tag);
         mVersionSection = findViewById(R.id.d_version_section);
         mVersionRow = (LinearLayout) findViewById(R.id.d_version_row);
         mChangelogSection = findViewById(R.id.d_changelog_section);
@@ -133,12 +138,73 @@ public class DetailActivity extends Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.detail, menu);
+        mUpdateItem = menu.findItem(R.id.action_update_request);
+        refreshUpdateItem();
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
         }
+        if (item.getItemId() == R.id.action_update_request) {
+            submitUpdateRequest();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** 菜单标题随状态变化：需要升级·N / 已反馈·N */
+    private void refreshUpdateItem() {
+        if (mUpdateItem == null) return;
+        if (mUpdateReq == null) {
+            mUpdateItem.setTitle(getString(R.string.update_request));
+        } else if (mUpdateReq.requested) {
+            mUpdateItem.setTitle(getString(R.string.update_request_done, mUpdateReq.total));
+        } else {
+            mUpdateItem.setTitle(getString(R.string.update_request_count, mUpdateReq.total));
+        }
+    }
+
+    private void loadUpdateStatus() {
+        Task.run(new Task.Background<Api.UpdateRequestStatus>() {
+            @Override
+            public Api.UpdateRequestStatus run() throws Exception {
+                return Api.updateRequestStatus(DetailActivity.this, mId);
+            }
+        }, new Task.Ui<Api.UpdateRequestStatus>() {
+            @Override
+            public void onDone(Api.UpdateRequestStatus result, Exception error) {
+                if (error != null || result == null) return;
+                mUpdateReq = result;
+                refreshUpdateItem();
+            }
+        });
+    }
+
+    /** 提交「需要升级」反馈（幂等，游客可提交） */
+    private void submitUpdateRequest() {
+        Task.run(new Task.Background<Api.UpdateRequestStatus>() {
+            @Override
+            public Api.UpdateRequestStatus run() throws Exception {
+                return Api.requestUpdate(DetailActivity.this, mId);
+            }
+        }, new Task.Ui<Api.UpdateRequestStatus>() {
+            @Override
+            public void onDone(Api.UpdateRequestStatus result, Exception error) {
+                if (error != null) {
+                    toast(error.getMessage());
+                    return;
+                }
+                mUpdateReq = result;
+                refreshUpdateItem();
+                toast(getString(R.string.update_request_ok));
+            }
+        });
     }
 
     private void toast(String msg) {
@@ -167,6 +233,7 @@ public class DetailActivity extends Activity {
                 mItem = result;
                 bindDetail();
                 loadReviews(true);
+                loadUpdateStatus();
                 // 若已下载过，按钮直接显示“安装”
                 String fn = defaultFileName(mItem);
                 if (fn != null && new File(ApkDownloader.downloadsDir(DetailActivity.this), fn).exists()) {
@@ -179,6 +246,13 @@ public class DetailActivity extends Activity {
 
     private void bindDetail() {
         getActionBar().setTitle(mItem.name);
+        // 类型标识（车机版/手机版）
+        if (mItem.type != null && mItem.type.length() > 0 && !"null".equalsIgnoreCase(mItem.type)) {
+            mTypeTag.setText(mItem.type);
+            mTypeTag.setVisibility(View.VISIBLE);
+        } else {
+            mTypeTag.setVisibility(View.GONE);
+        }
         if (mItem.thumbnailUrl == null || mItem.thumbnailUrl.length() == 0 || "null".equals(mItem.thumbnailUrl)) {
             mIcon.setImageDrawable(new asia.carmix.market.util.LetterDrawable(mItem.name));
         } else {

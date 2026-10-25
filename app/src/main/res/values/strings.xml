@@ -41,8 +41,14 @@
     <string name="changelog_title">更新日志</string>
 
     <!-- 列表项 -->
-    <string name="badge_official">官方</string>
+    <string name="badge_official">★ 官方</string>
     <string name="badge_hot">热门</string>
+    <string name="type_car">车机版</string>
+    <string name="type_phone">手机版</string>
+    <string name="update_request">需要升级</string>
+    <string name="update_request_done">已反馈 · %1$d 人</string>
+    <string name="update_request_count">需要升级 · %1$d 人</string>
+    <string name="update_request_ok">已反馈给管理员，感谢你的反馈</string>
 
     <!-- 详情 -->
     <string name="author_label">作者：%1$s</string>

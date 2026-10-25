@@ -71,7 +71,7 @@
             android:id="@+id/sort_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right|center_vertical"
+            android:gravity="left|center_vertical"
             android:orientation="horizontal"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
