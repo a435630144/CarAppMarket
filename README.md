@@ -12,17 +12,6 @@
 
 本项目基于 **GPL-3.0** 协议开源，完整文本见 [LICENSE](LICENSE)。
 
-## 感谢打赏 ❤️
-
-本项目完全免费开源，用爱发电。如果车软星球市场帮到了你，欢迎请作者喝杯咖啡——
-每一份支持都是持续更新的动力 🙏
-
-<p align="center">
-  <img src="screenshots/donate_alipay.jpg" width="280" alt="支付宝打赏">
-</p>
-
-> 支付宝扫一扫即可打赏，金额随意，不强求～
-
 ## 发版与自更新（维护者须知）
 
 - **正式签名**：keystore 在仓库外（`<开发目录>\keystores\carmix-market.jks`），
@@ -205,3 +194,13 @@ app/src/main/java/asia/carmix/market/
 - 模拟器装有 OneUIDesktop 车机桌面（HOME 应用，带看门狗自动重启、会周期性抢焦点），
   自动化测试时需 `am force-stop com.example.oneuidesktop` 或临时 `pm disable-user`
 
+## 感谢打赏 ❤️
+
+本项目完全免费开源，用爱发电。如果车软星球市场帮到了你，欢迎请作者喝杯咖啡——
+每一份支持都是持续更新的动力 🙏
+
+<p align="center">
+  <img src="screenshots/donate_alipay.jpg" width="280" alt="支付宝打赏">
+</p>
+
+> 支付宝扫一扫即可打赏，金额随意，不强求～
