@@ -8,25 +8,10 @@ import android.graphics.drawable.Drawable;
 
 /**
  * 无图标时的字母占位图：圆角底色（按名字哈希取色）+ 名称首字符。
- * 实例按名字缓存复用，避免列表快速滚动时反复分配。
+ * 注意：Drawable 实例绑定视图边界（bounds），不同尺寸视图不可共享同一实例
+ * （曾因跨尺寸共享导致详情页返回后网格图标比例错乱），每次绑定新建，开销可忽略。
  */
 public class LetterDrawable extends Drawable {
-
-    private static final android.util.LruCache<String, LetterDrawable> sCache =
-            new android.util.LruCache<String, LetterDrawable>(64);
-
-    /** 取缓存实例（无则创建），绑定处调用避免重复分配 */
-    public static LetterDrawable obtain(String name) {
-        String key = name == null ? "?" : name;
-        synchronized (sCache) {
-            LetterDrawable d = sCache.get(key);
-            if (d == null) {
-                d = new LetterDrawable(name);
-                sCache.put(key, d);
-            }
-            return d;
-        }
-    }
 
     private static final int[] PALETTE = {
             0xFF60A5FA, 0xFF34D399, 0xFFF472B6, 0xFFA78BFA,

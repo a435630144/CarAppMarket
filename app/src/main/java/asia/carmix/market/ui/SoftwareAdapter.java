@@ -232,7 +232,7 @@ public class SoftwareAdapter extends BaseAdapter {
 
     private void bindIcon(ImageView icon, SoftwareItem s) {
         if (s.thumbnailUrl == null || s.thumbnailUrl.length() == 0 || "null".equals(s.thumbnailUrl)) {
-            icon.setImageDrawable(LetterDrawable.obtain(s.name));
+            icon.setImageDrawable(new LetterDrawable(s.name));
         } else {
             ImageLoader.get(icon.getContext()).display(icon, s.thumbnailUrl, R.drawable.placeholder_app);
         }

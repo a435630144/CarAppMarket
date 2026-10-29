@@ -30,6 +30,7 @@ import asia.carmix.market.model.SoftwareItem;
 import asia.carmix.market.util.ApkDownloader;
 import asia.carmix.market.util.Formatters;
 import asia.carmix.market.util.ImageLoader;
+import asia.carmix.market.util.LetterDrawable;
 import asia.carmix.market.util.Task;
 
 /**
@@ -264,7 +265,7 @@ public class DetailActivity extends BaseActivity {
         // 类型标识（车机版=蓝 / 手机版=绿），与卡片共用同一配色规则
         SoftwareAdapter.bindTypeTag(mTypeTag, mItem.type);
         if (mItem.thumbnailUrl == null || mItem.thumbnailUrl.length() == 0 || "null".equals(mItem.thumbnailUrl)) {
-            mIcon.setImageDrawable(asia.carmix.market.util.LetterDrawable.obtain(mItem.name));
+            mIcon.setImageDrawable(new LetterDrawable(mItem.name));
         } else {
             ImageLoader.get(this).display(mIcon, mItem.thumbnailUrl, R.drawable.placeholder_app);
         }
