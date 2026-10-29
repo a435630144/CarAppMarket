@@ -105,6 +105,17 @@
     <string name="password_too_short">密码至少6位</string>
     <string name="register_ok">注册成功，已自动登录</string>
     <string name="appearance">外观（昼夜模式）</string>
+    <string name="about">关于</string>
+    <string name="about_title">关于</string>
+    <string name="about_app_desc">面向车机的开源应用商店\n最低兼容 Android 4.0 · 车机横屏优先</string>
+    <string name="about_version">版本</string>
+    <string name="about_author">作者</string>
+    <string name="author_name">a435630144</string>
+    <string name="about_repo">GitHub 仓库</string>
+    <string name="about_license">开源协议</string>
+    <string name="about_site">官方站点</string>
+    <string name="check_update">检查更新</string>
+    <string name="update_latest">已是最新版本</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">浅色模式</string>
     <string name="theme_dark">深色模式</string>

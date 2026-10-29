@@ -356,7 +356,8 @@ public class MainActivity extends BaseActivity {
                 .show();
     }
 
-    private static String sha256OfFile(File f) {
+    /** sha256 文件摘要（自更新与关于页共用） */
+    public static String sha256OfFile(File f) {
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
             java.io.InputStream in = new java.io.FileInputStream(f);
@@ -931,6 +932,9 @@ public class MainActivity extends BaseActivity {
             return true;
         } else if (id == R.id.action_appearance) {
             showAppearanceDialog();
+            return true;
+        } else if (id == R.id.action_about) {
+            startActivity(new Intent(this, AboutActivity.class));
             return true;
         }
         return false;

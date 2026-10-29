@@ -45,6 +45,10 @@
             android:name=".ui.DownloadManagerActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false" />
+
         <!-- APK 文件提供者：Android 7.0+ 禁止 file:// URI 共享，安装必须走 content:// -->
         <provider
             android:name=".provider.ApkFileProvider"
