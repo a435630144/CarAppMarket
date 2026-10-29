@@ -65,6 +65,24 @@ public class AboutActivity extends BaseActivity {
                 open("https://<后端域名>");
             }
         });
+        // 支付宝打赏：弹收款码
+        findViewById(R.id.a_donate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                android.widget.ScrollView sc = new android.widget.ScrollView(AboutActivity.this);
+                android.widget.ImageView iv = new android.widget.ImageView(AboutActivity.this);
+                iv.setImageResource(R.drawable.alipay_qr);
+                iv.setAdjustViewBounds(true);
+                int pad = (int) (16 * getResources().getDisplayMetrics().density);
+                sc.addView(iv);
+                sc.setPadding(pad, pad, pad, pad);
+                new AlertDialog.Builder(AboutActivity.this)
+                        .setTitle(R.string.about_donate)
+                        .setView(sc)
+                        .setPositiveButton(R.string.cancel, null)
+                        .show();
+            }
+        });
         // 手动检查更新（忽略 1 小时节流）
         mCheckBtn = (TextView) findViewById(R.id.a_check_update);
         mCheckBtn.setOnClickListener(new View.OnClickListener() {

@@ -12,6 +12,17 @@
 
 本项目基于 **GPL-3.0** 协议开源，完整文本见 [LICENSE](LICENSE)。
 
+## 感谢打赏 ❤️
+
+本项目完全免费开源，用爱发电。如果车软星球市场帮到了你，欢迎请作者喝杯咖啡——
+每一份支持都是持续更新的动力 🙏
+
+<p align="center">
+  <img src="screenshots/donate_alipay.jpg" width="280" alt="支付宝打赏">
+</p>
+
+> 支付宝扫一扫即可打赏，金额随意，不强求～
+
 ## 发版与自更新（维护者须知）
 
 - **正式签名**：keystore 在仓库外（`<开发目录>\keystores\carmix-market.jks`），
@@ -22,6 +33,20 @@
   老版本 App 启动时自动检查 `GET /api/app/latest` 弹横幅提示升级
 - **自更新规则**：versionCode 单调递增是唯一判据；低于 `minSupportedCode` 强更（不可关闭弹窗）；
   下载完成后 sha256 校验，不匹配即删包
+
+## 界面预览
+
+| 浅色 · 车机首页 | 深色 · 车机首页 |
+|---|---|
+| ![浅色首页](screenshots/home_light.png) | ![深色首页](screenshots/home_dark.png) |
+
+| 深色 · 应用详情 | 下载管理 |
+|---|---|
+| ![深色详情](screenshots/detail_dark.png) | ![下载管理](screenshots/download_manager.png) |
+
+| 下载进度（实时速度） | 关于 |
+|---|---|
+| ![下载进度](screenshots/download_progress.png) | ![关于](screenshots/about.png) |
 
 ## 功能
 

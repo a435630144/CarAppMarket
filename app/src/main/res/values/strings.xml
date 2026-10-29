@@ -116,6 +116,8 @@
     <string name="about_site">官方站点</string>
     <string name="check_update">检查更新</string>
     <string name="update_latest">已是最新版本</string>
+    <string name="about_donate">请作者喝杯咖啡</string>
+    <string name="about_donate_action">支付宝打赏</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">浅色模式</string>
     <string name="theme_dark">深色模式</string>
