@@ -65,20 +65,33 @@ public class AboutActivity extends BaseActivity {
                 open("https://<后端域名>");
             }
         });
-        // 支付宝打赏：弹收款码
+        // 支付宝打赏：弹收款码（按屏幕可用高度等比缩放，一页完整显示不滚动）
         findViewById(R.id.a_donate).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                android.widget.ScrollView sc = new android.widget.ScrollView(AboutActivity.this);
+                android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+                int maxH = (int) (dm.heightPixels * 0.60f);
+                int maxW = (int) (dm.widthPixels * 0.72f);
+                // 图片 420x630（2:3），先按高度限制算宽，超宽再按宽度限制
+                int w = maxH * 420 / 630;
+                int h = maxH;
+                if (w > maxW) {
+                    w = maxW;
+                    h = w * 630 / 420;
+                }
+                int pad = (int) (14 * dm.density);
+
+                android.widget.LinearLayout box = new android.widget.LinearLayout(AboutActivity.this);
+                box.setOrientation(android.widget.LinearLayout.VERTICAL);
+                box.setGravity(android.view.Gravity.CENTER);
+                box.setPadding(pad, pad, pad, pad);
                 android.widget.ImageView iv = new android.widget.ImageView(AboutActivity.this);
                 iv.setImageResource(R.drawable.alipay_qr);
-                iv.setAdjustViewBounds(true);
-                int pad = (int) (16 * getResources().getDisplayMetrics().density);
-                sc.addView(iv);
-                sc.setPadding(pad, pad, pad, pad);
+                box.addView(iv, new android.widget.LinearLayout.LayoutParams(w, h));
+
                 new AlertDialog.Builder(AboutActivity.this)
                         .setTitle(R.string.about_donate)
-                        .setView(sc)
+                        .setView(box)
                         .setPositiveButton(R.string.cancel, null)
                         .show();
             }
