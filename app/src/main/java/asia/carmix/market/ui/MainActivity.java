@@ -91,6 +91,32 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        boolean landscape =
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        // 横屏隐藏 ActionBar：侧栏品牌头已是唯一标识（否则左上名称重复）；竖屏保留
+        if (landscape) {
+            android.app.ActionBar ab = getActionBar();
+            if (ab != null) ab.hide();
+            View more = findViewById(R.id.btn_more);
+            if (more != null) {
+                more.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        android.widget.PopupMenu pm =
+                                new android.widget.PopupMenu(MainActivity.this, v);
+                        pm.getMenuInflater().inflate(R.menu.main, pm.getMenu());
+                        pm.setOnMenuItemClickListener(new android.widget.PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                return applyMenuAction(item.getItemId());
+                            }
+                        });
+                        pm.show();
+                    }
+                });
+            }
+        }
+
         if (savedInstanceState != null) {
             String cat = savedInstanceState.getString("category");
             if (cat != null) mCurrentCategory = cat;
@@ -891,7 +917,12 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        if (applyMenuAction(item.getItemId())) return true;
+        return super.onOptionsItemSelected(item);
+    }
+
+    /** 菜单动作统一处理：ActionBar 溢出菜单与侧栏 ⋮ 弹出菜单共用 */
+    private boolean applyMenuAction(int id) {
         if (id == R.id.action_refresh) {
             loadPage(1, true);
             return true;
@@ -902,7 +933,7 @@ public class MainActivity extends BaseActivity {
             showAppearanceDialog();
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     /** 昼夜模式三选一：跟随系统 / 浅色 / 深色，选择后立即重建生效 */
