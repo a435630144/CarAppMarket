@@ -20,8 +20,8 @@ android {
         minSdk 14
         // targetSdk 28：避免分区存储；>=23 保证 Android 14+ 允许侧载安装
         targetSdk 28
-        versionCode 17
-        versionName '1.11.0'
+        versionCode 18
+        versionName '1.12.0'
         // 资源只保留中文，裁掉依赖库携带的其他语言表（低配设备省内存省体积）
         resourceConfigurations += ['zh', 'zh-rCN']
     }

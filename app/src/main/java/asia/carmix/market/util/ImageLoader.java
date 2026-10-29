@@ -3,6 +3,7 @@ package asia.carmix.market.util;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -178,9 +179,30 @@ public class ImageLoader {
             }
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize = sample;
-            return BitmapFactory.decodeFile(path, o2);
+            Bitmap src = BitmapFactory.decodeFile(path, o2);
+            // 图标统一圆角：修复"占位图圆角而真图直角"的观感不一致
+            return roundCorners(src, maxDim <= 256 ? 18f : 12f);
         } catch (Throwable e) {
             return null;
+        }
+    }
+
+    /** 位图圆角遮罩（BitmapShader 绘制，兼容 API 14；原位图回收） */
+    private static Bitmap roundCorners(Bitmap src, float radiusPx) {
+        if (src == null || src.isRecycled()) return src;
+        try {
+            Bitmap out = Bitmap.createBitmap(src.getWidth(), src.getHeight(),
+                    android.graphics.Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(out);
+            android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+            p.setShader(new android.graphics.BitmapShader(src,
+                    android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP));
+            c.drawRoundRect(new android.graphics.RectF(0, 0,
+                    src.getWidth(), src.getHeight()), radiusPx, radiusPx, p);
+            if (src != out) src.recycle();
+            return out;
+        } catch (Throwable t) {
+            return src; // 失败退回直角原图
         }
     }
 

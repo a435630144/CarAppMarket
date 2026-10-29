@@ -161,7 +161,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/versions_title"
+                        android:drawableLeft="@drawable/bg_section_bar"
+                    android:drawablePadding="6dp"
+                    android:text="@string/versions_title"
                         android:textColor="@color/text_main"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -198,6 +200,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/bg_section_bar"
+                    android:drawablePadding="6dp"
                     android:text="@string/section_desc"
                     android:textColor="@color/text_main"
                     android:textSize="15sp"
@@ -222,7 +226,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_shots"
+                        android:drawableLeft="@drawable/bg_section_bar"
+                    android:drawablePadding="6dp"
+                    android:text="@string/section_shots"
                         android:textColor="@color/text_main"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -251,7 +257,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/reviews_title"
+                        android:drawableLeft="@drawable/bg_section_bar"
+                    android:drawablePadding="6dp"
+                    android:text="@string/reviews_title"
                         android:textColor="@color/text_main"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -295,7 +303,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/changelog_title"
+                        android:drawableLeft="@drawable/bg_section_bar"
+                    android:drawablePadding="6dp"
+                    android:text="@string/changelog_title"
                         android:textColor="@color/text_main"
                         android:textSize="15sp"
                         android:textStyle="bold" />
