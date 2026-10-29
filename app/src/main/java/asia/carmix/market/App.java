@@ -11,7 +11,7 @@ import org.conscrypt.Conscrypt;
 /**
  * 全局 Application：在老系统上抢先安装 Conscrypt 安全提供者。
  *
- * 背景：<后端域名> 位于 Cloudflare 之后，最低要求 TLS 1.2。
+ * 背景：后端站点位于 Cloudflare 之后，最低要求 TLS 1.2。
  * - Android 4.1~4.4：系统 OpenSSL 支持 TLS 1.2 但默认不启用；
  * - Android 4.0.x：系统 OpenSSL 完全没有 TLS 1.2。
  * 把 Conscrypt 插到提供者列表首位后，OkHttp 的 SSLContext 即具备 TLS 1.2/1.3 能力。

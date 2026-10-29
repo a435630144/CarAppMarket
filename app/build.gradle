@@ -3,12 +3,14 @@ plugins {
 }
 
 // 正式签名凭据从根目录 keystore.properties 读取（该文件不入 git，指向仓库外的 keystore）；
-// 没有该文件（如他人 clone / CI）时 release 产物退化为未签名，构建不失败
+// 没有该文件（如他人 clone / CI）时 release 产物退化为未签名，构建不失败。
+// 后端地址同样从该文件注入（backendUrl），仓库与 git 历史中不出现真实站点域名。
 def keystorePropsFile = rootProject.file('keystore.properties')
 def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) {
     keystorePropsFile.withInputStream { keystoreProps.load(it) }
 }
+def backendUrl = keystoreProps.getOrDefault('backendUrl', 'https://backend.example.com')
 
 android {
     namespace 'asia.carmix.market'
@@ -24,6 +26,8 @@ android {
         versionName '1.14.0'
         // 资源只保留中文，裁掉依赖库携带的其他语言表（低配设备省内存省体积）
         resourceConfigurations += ['zh', 'zh-rCN']
+        // 后端地址构建期注入：真实域名只存在于 gitignored 的 keystore.properties
+        buildConfigField 'String', 'BACKEND_URL', "\"${backendUrl}\""
     }
 
     buildFeatures {
@@ -31,6 +35,7 @@ android {
         aidl false
         renderScript false
         shaders false
+        buildConfig true
     }
 
     // 正式签名：见根目录 keystore.properties（勿提交）；debug 构建用本机默认调试密钥

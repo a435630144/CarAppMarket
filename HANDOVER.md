@@ -10,7 +10,7 @@
 | 应用 | 车软星球市场（CarAppMarket），<后端域名> 车机软件站的安卓客户端 |
 | 包名 | `asia.carmix.market` |
 | 仓库 | https://github.com/a435630144/CarAppMarket（GPL-3.0） |
-| 后端仓库 | `E:\OneDrive\自学编程\MimoDesktop\appshare\appshare`（NestJS + TypeORM + MySQL/Redis + R2/本地存储），生产部署 <后端域名>，API 前缀 `/api` |
+| 后端仓库 | `<后端仓库目录>`（NestJS + TypeORM + MySQL/Redis + R2/本地存储），生产部署 <后端域名>，API 前缀 `/api` |
 | 技术边界 | **minSdk 14（Android 4.0）/ targetSdk 28 / 零 AndroidX**；依赖仅 OkHttp 3.12.13 + Conscrypt 2.5.2 |
 | 主场景 | 车机横屏大屏（800×480 ~ 21:9），竖屏手机兼容 |
 
@@ -56,14 +56,14 @@ res/
 
 | 项 | 路径/版本 |
 |---|---|
-| JDK | `<开发目录>\jdk`（Temurin 17） |
-| Gradle | `<开发目录>\gradle-8.9\bin\gradle.bat` |
-| Android SDK | `<开发目录>\Sdk`（platform 35 / build-tools 34） |
+| JDK | `<JDK17 目录>`（Temurin 17） |
+| Gradle | `<Gradle 目录>\bin\gradle.bat` |
+| Android SDK | `<SDK 目录>`（platform 35 / build-tools 34） |
 
 ```bat
-set JAVA_HOME=<开发目录>\jdk
-set ANDROID_HOME=<开发目录>\Sdk
-<开发目录>\gradle-8.9\bin\gradle.bat assembleRelease
+set JAVA_HOME=<JDK17 目录>
+set ANDROID_HOME=<SDK 目录>
+<Gradle 目录>\bin\gradle.bat assembleRelease
 ```
 
 - 依赖走阿里云镜像（`settings.gradle`），国内网络可直接构建
@@ -72,10 +72,10 @@ set ANDROID_HOME=<开发目录>\Sdk
 
 ## 4. 签名管理（最高优先级事项）
 
-- 正式 keystore：`<开发目录>\keystores\carmix-market.jks`
-  （别名 `carmix-market`，密码见 OneDrive 备份说明文件）
+- 正式 keystore：`<安全目录>\carmix-market.jks`
+  （别名 `carmix-market`，密码见备份说明文件（与密钥一同存放））
 - 凭据文件：项目根 `keystore.properties`（**已 gitignore**，指向外部 keystore）
-- 备份：`E:\OneDrive\keystore-backup\`（jks + 说明）。**还需要一份离线备份（U 盘）**
+- 备份：`<备份目录>\`（jks + 说明）。**还需要一份离线备份（U 盘）**
 - ⚠️ 丢失 = 应用永远无法覆盖升级；泄露 = 任何人可签同签名恶意更新覆盖安装到用户车机
 - ⚠️ 仓库 git 历史中残留旧 debug.keystore（已作废）：它签过的历史测试包与新签名互不兼容，
   装过 v1.10.0 及之前测试包的设备升级需卸载重装

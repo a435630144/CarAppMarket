@@ -26,12 +26,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * <后端域名> API 客户端（全部方法为同步阻塞调用，必须在后台线程执行）。
+ * 后端 API 客户端（全部方法为同步阻塞调用，必须在后台线程执行）。
  */
 public class Api {
 
     /** 站点根地址（图片等静态资源可能直接挂在站点域名下） */
-    public static final String SITE = "https://<后端域名>";
+    public static final String SITE = BuildConfig.BACKEND_URL; // 构建期注入，仓库不含真实地址
     /** 后端 globalPrefix 为 api */
     public static final String BASE = SITE + "/api";
 

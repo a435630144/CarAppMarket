@@ -14,8 +14,8 @@
 
 ## 发版与自更新（维护者须知）
 
-- **正式签名**：keystore 在仓库外（`<开发目录>\keystores\carmix-market.jks`），
-  凭据走根目录 `keystore.properties`（已 gitignore）。**该文件与备份（OneDrive\keystore-backup\）绝对不能丢失或泄露**——
+- **正式签名**：keystore 在仓库外（`<安全目录>\carmix-market.jks`），
+  凭据走根目录 `keystore.properties`（已 gitignore）。**该文件与备份（<备份目录>\）绝对不能丢失或泄露**——
   丢失=永远无法覆盖升级；泄露=任何人可签同签名恶意更新。仓库历史中的旧 debug.keystore 已作废，仅用于历史测试包。
 - **发版流程**：改 `app/build.gradle` 版本号 → `gradle assembleRelease` → 用后端现有上传接口传 APK
   → `POST /api/app/release`（admin，body: versionCode/versionName/downloadUrl/sha256/changelog）→
@@ -33,9 +33,9 @@
 |---|---|
 | ![深色详情](screenshots/detail_dark.png) | ![下载管理](screenshots/download_manager.png) |
 
-| 下载进度（实时速度） | 关于 |
+| 下载进度（实时速度） |
 |---|---|
-| ![下载进度](screenshots/download_progress.png) | ![关于](screenshots/about.png) |
+| ![下载进度](screenshots/download_progress.png) |
 
 ## 功能
 
@@ -78,14 +78,14 @@
 
 ## 构建
 
-本机已具备：`<开发目录>\jdk`（Temurin 17）、`<开发目录>\gradle-8.9`、
+本机已具备：`<JDK17 目录>`（Temurin 17）、`<Gradle 目录>`、
 SDK（platform 35 / build-tools 34）。
 
 ```bat
-cd /d E:\OneDrive\家里台式\桌面\temp\CarAppMarket
-set JAVA_HOME=<开发目录>\jdk
-set ANDROID_HOME=<开发目录>\Sdk
-<开发目录>\gradle-8.9\bin\gradle.bat assembleDebug
+cd /d <项目目录>
+set JAVA_HOME=<JDK17 目录>
+set ANDROID_HOME=<SDK 目录>
+<Gradle 目录>\bin\gradle.bat assembleDebug
 ```
 
 产物：

@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import asia.carmix.market.BuildConfig;
 import asia.carmix.market.R;
 import asia.carmix.market.api.Api;
 import asia.carmix.market.util.ApkDownloader;
@@ -62,7 +63,7 @@ public class AboutActivity extends BaseActivity {
         findViewById(R.id.a_site).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                open("https://<后端域名>");
+                open(BuildConfig.BACKEND_URL);
             }
         });
         // 支付宝打赏：弹收款码（按屏幕可用高度等比缩放，一页完整显示不滚动）
